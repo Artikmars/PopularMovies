@@ -43,24 +43,20 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
 
     private RecyclerView recyclerView;
     private List<PopularMovies> popularMoviesList;
-    private RecyclerViewAdapter recyclerViewAdapter;
     private AlertDialog alertDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.i(TAG, "onCreate ");
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+        recyclerView = findViewById(R.id.rvMovies);
+
         setSupportActionBar(toolbar);
 
-        recyclerView = findViewById(R.id.rvMovies);
-        recyclerViewAdapter = new RecyclerViewAdapter(popularMoviesList);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        //recyclerView.addItemDecoration(new GridItemDecoration());
         getJSONData(mostPopularUrl);
-
 
     }
 
@@ -93,58 +89,30 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
                         responseJSON = response.body().string();
                         Log.i(TAG, "responseJSON: " + responseJSON);
 
-                        // Log.i(TAG, "popularMoviesList: " + popularMoviesList.toString());
-
                         runOnUiThread(new Runnable() {
                                           @Override
                                           public void run() {
-                              /*  if (!popularMoviesList.isEmpty()) {
-                                    RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(MainActivity.this,
-                                            popularMoviesList);
-                                    recyclerView.setAdapter(recyclerViewAdapter);
-                                } else {
-                                    Log.i(TAG, "popularMoviesList is empty");
-                                }
-                          */
                                               parseJSONData(responseJSON);
-
                                           }
                                       }
                         );
 
-
                     } else {
-                        Log.i(TAG, "response is not successful ");
+                        Log.i(TAG, "Response is not successful ");
                     }
                 }
             });
 
         } else {
-            Log.i(TAG, "NO Internet Connection");
+            Log.i(TAG, "No Internet Connection");
         }
-
-       /* if (popularMovies != null) {
-            populateUI(popularMovies);
-        } else {
-            Log.i(TAG, "popularMovies: NULL - " + popularMovies);
-        }*/
-
 
     }
 
     private void parseJSONData(String responseJSON) {
-
         popularMoviesList = PopularMoviesParsing.parseMoviesJSON(responseJSON);
-        recyclerViewAdapter = new RecyclerViewAdapter(MainActivity.this, popularMoviesList, (RecyclerViewAdapter.ItemClickListener) this);
-        recyclerViewAdapter.notifyDataSetChanged();
-        Log.i(TAG, "before recyclerViewAdapter");
-        Log.i(TAG, "popularMoviesList " + popularMoviesList);
-
-        recyclerView.setLayoutManager(null);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        //recyclerView.addItemDecoration(new GridItemDecoration(this, 0, 0, 0, 0));
+        RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(MainActivity.this, popularMoviesList, this);
         recyclerView.setAdapter(recyclerViewAdapter);
-
     }
 
     @Override
@@ -156,10 +124,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
         if (id == R.id.sort) {
 
@@ -198,7 +162,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-
         return activeNetworkInfo != null;
     }
 

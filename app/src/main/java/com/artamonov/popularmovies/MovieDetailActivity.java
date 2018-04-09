@@ -41,19 +41,21 @@ public class MovieDetailActivity extends AppCompatActivity {
         Intent intent = getIntent();
         Picasso.with(context)
                 .load(intent.getStringExtra("posterPath"))
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.placeholder_error)
                 .into(ivDetailPoster);
 
         String releaseDate = intent.getStringExtra("releaseDate");
         String[] releaseDateArray = releaseDate.split("-");
 
-        String releadeDateFullFormat = releaseDateArray[2] + "." + releaseDateArray[1] + "." +
+        String releaseDateFullFormat = releaseDateArray[2] + "." + releaseDateArray[1] + "." +
                 releaseDateArray[0];
 
         String voteAverage = intent.getStringExtra("voteAverage");
         String voteAverageOverTen = voteAverage + "/10";
 
         tvTitle.setText(intent.getStringExtra("title"));
-        tvReleaseDate.setText(releadeDateFullFormat);
+        tvReleaseDate.setText(releaseDateFullFormat);
         tvVoteAverage.setText(voteAverageOverTen);
         tvOverview.setText(intent.getStringExtra("overview"));
 

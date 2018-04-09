@@ -9,10 +9,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.content.ContentValues.TAG;
-
 public class PopularMoviesParsing {
-
 
 
     public static List<PopularMovies> parseMoviesJSON(String json) {
@@ -22,11 +19,9 @@ public class PopularMoviesParsing {
 
         try {
             JSONObject jsonObject = new JSONObject(json);
-            Log.i(MainActivity.TAG, "jsonObject: " + jsonObject);
             JSONArray resultsJsonArray = jsonObject.getJSONArray("results");
-            Log.i(MainActivity.TAG, "resultsJsonArray: " + resultsJsonArray);
 
-            if (resultsJsonArray.length() != 0 ) {
+            if (resultsJsonArray.length() != 0) {
                 for (int i = 0; i < resultsJsonArray.length(); i++) {
                     JSONObject jsonMovieObject = resultsJsonArray.getJSONObject(i);
                     String posterPath = jsonMovieObject.optString("poster_path");
@@ -46,9 +41,6 @@ public class PopularMoviesParsing {
 
                     results.add(popularMovies);
 
-                    Log.i(MainActivity.TAG, "popularMovies: " + results.get(i).getTitle() + ", " +
-                    results.get(i).getVoteAverage() + " " + results.get(i).getReleaseDate() +
-                    " " + results.get(i).getOverview());
                 }
             } else {
                 Log.i(MainActivity.TAG, "resultsJsonArray is empty");
@@ -57,12 +49,6 @@ public class PopularMoviesParsing {
             Log.i(MainActivity.TAG, "JSONException: " + e);
         }
         return results;
-
-     /*
-
-
-        Uri webpage = Uri.parse(url);*/
-
 
     }
 
