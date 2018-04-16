@@ -11,12 +11,14 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,7 +41,7 @@ import okhttp3.Response;
 import static com.artamonov.popularmovies.MainActivity.API_KEY;
 import static com.artamonov.popularmovies.MainActivity.responseJSON;
 
-public class MovieDetailActivity extends AppCompatActivity implements MovieTrailersRecyclerViewAdapter.ItemClickListener {
+public class MovieDetailActivity extends AppCompatActivity {
 
     private static String movieTrailersURL;
     ImageView ivDetailPoster;
@@ -47,8 +49,16 @@ public class MovieDetailActivity extends AppCompatActivity implements MovieTrail
     TextView tvVoteAverage;
     TextView tvReleaseDate;
     TextView tvTitle;
+
+    TextView trailerName;
+    TextView trailerNumber;
+    TextView trailerQuality;
+    TextView tvTrailer;
+
+    ImageView ibPlay;
+
     Context context;
-    RecyclerView rvTrailers;
+    Spinner sMovieTrailers;
     int movieID;
     List<PopularMovies> movieTrailers = new ArrayList<>();
 
@@ -68,7 +78,9 @@ public class MovieDetailActivity extends AppCompatActivity implements MovieTrail
         tvReleaseDate = findViewById(R.id.tvReleaseDate);
         tvVoteAverage = findViewById(R.id.tvVoteAverage);
         tvTitle = findViewById(R.id.tvTitle);
-        rvTrailers = findViewById(R.id.rvTrailers);
+        sMovieTrailers = findViewById(R.id.sMovieTrailers);
+        ibPlay = findViewById(R.id.ibPlay);
+
 
         Intent intent = getIntent();
         Picasso.with(context)
@@ -96,7 +108,6 @@ public class MovieDetailActivity extends AppCompatActivity implements MovieTrail
         movieTrailersURL = "https://api.themoviedb.org/3/movie/" + movieID + "/videos?api_key=" + API_KEY + "&language=en-US";
         Log.i(MainActivity.TAG, "movieTrailersURL" + movieTrailersURL);
 
-        rvTrailers.setLayoutManager(new LinearLayoutManager(this));
         getJSONMovieTrailers(movieTrailersURL);
         Log.i(MainActivity.TAG, "movieTrailers" + movieTrailers.toString());
 
@@ -178,14 +189,48 @@ public class MovieDetailActivity extends AppCompatActivity implements MovieTrail
                     PopularMovies popularMovies = new PopularMovies();
                     popularMovies.setTrailerKey(trailerKey);
                     popularMovies.setTrailerName(trailerName);
-                    popularMovies.setTrailerName(trailerQuality);
+                    popularMovies.setTrailerQuality(trailerQuality);
                     movieTrailers.add(popularMovies);
                 }
 
             }
 
-            MovieTrailersRecyclerViewAdapter movieTrailersRecyclerViewAdapter = new MovieTrailersRecyclerViewAdapter(MovieDetailActivity.this, movieTrailers, this);
-            rvTrailers.setAdapter(movieTrailersRecyclerViewAdapter);
+            SpinnerMovieTrailersAdapter adapter = new SpinnerMovieTrailersAdapter(this,
+                    R.layout.movie_trailers, movieTrailers);
+
+            sMovieTrailers.setAdapter(adapter);
+            sMovieTrailers.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+
+                    trailerName = findViewById(R.id.trailerName);
+                    trailerNumber = findViewById(R.id.trailerNumber);
+                    trailerQuality = findViewById(R.id.trailerQuality);
+                    tvTrailer = findViewById(R.id.tvTrailer);
+                    ConstraintLayout constraintLayout = view.findViewById(R.id.movieTrailersLayout);
+
+                    PopularMovies popularMovies = movieTrailers.get(pos);
+                    trailerName.setText(popularMovies.getTrailerName());
+                    Integer currentPosition = pos + 1;
+                    trailerNumber.setText(String.valueOf(currentPosition));
+
+                    String qualityString = popularMovies.getTrailerQuality();
+                    Integer quality = Integer.parseInt(qualityString);
+                    if (quality == 1080)
+                        constraintLayout.setBackgroundColor(getResources().getColor(R.color.green));
+                    else if (quality == 720)
+                        constraintLayout.setBackgroundColor(getResources().getColor(R.color.yellow));
+                    else
+                        constraintLayout.setBackgroundColor(getResources().getColor(R.color.red));
+                }
+
+                public void onNothingSelected(AdapterView<?> parent) {
+                    trailerName.setText(null);
+                    trailerNumber.setText(null);
+                    trailerQuality.setText(null);
+                    tvTrailer.setText(getResources().getString(R.string.pick_trailer));
+
+                }
+            });
 
 
         } catch (JSONException e) {
@@ -194,14 +239,15 @@ public class MovieDetailActivity extends AppCompatActivity implements MovieTrail
 
     }
 
+
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
     }
 
-    @Override
-    public void onItemTrailerClick(int position) {
+    public void playTrailer(View view) {
+        Integer position = Integer.parseInt(trailerNumber.getText().toString()) - 1;
         PopularMovies popularMovies = movieTrailers.get(position);
         Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + popularMovies.getTrailerKey()));
         Intent webIntent = new Intent(Intent.ACTION_VIEW,
@@ -214,6 +260,5 @@ public class MovieDetailActivity extends AppCompatActivity implements MovieTrail
             startActivity(webIntent);
 
         }
-
     }
 }

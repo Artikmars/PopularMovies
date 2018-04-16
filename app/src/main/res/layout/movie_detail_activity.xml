@@ -2,6 +2,7 @@
 
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,15 +11,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rvTrailers"
-            android:layout_width="365dp"
-            android:layout_height="wrap_content"
+        <Spinner
+            android:id="@+id/sMovieTrailers"
+            android:layout_width="162dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:spinnerMode="dialog"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.526"
+            app:layout_constraintHorizontal_bias="0.072"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvOverview" />
+
+        <ImageView
+            android:id="@+id/ibPlay"
+            android:layout_width="42dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="196dp"
+            android:layout_marginTop="8dp"
+            android:onClick="playTrailer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvOverview"
+            app:srcCompat="@android:drawable/ic_media_play" />
 
         <include
             android:id="@+id/toolbar"

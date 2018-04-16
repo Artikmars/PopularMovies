@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         setSupportActionBar(toolbar);
 
         rvMovies.setLayoutManager(new GridLayoutManager(this, 2));
+
         getJSONData(mostPopularUrl);
 
 
