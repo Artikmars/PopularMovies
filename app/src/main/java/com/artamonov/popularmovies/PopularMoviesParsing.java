@@ -31,9 +31,11 @@ public class PopularMoviesParsing {
                     String voteAverage = jsonMovieObject.optString("vote_average");
                     String release_date = jsonMovieObject.optString("release_date");
                     String overview = jsonMovieObject.optString("overview");
+                    Integer id = jsonMovieObject.optInt("id");
 
                     PopularMovies popularMovies = new PopularMovies();
                     popularMovies.setBaseUrl(baseURL);
+                    popularMovies.setId(id);
                     popularMovies.setTitle(title);
                     popularMovies.setReleaseDate(release_date);
                     popularMovies.setVoteAverage(voteAverage);

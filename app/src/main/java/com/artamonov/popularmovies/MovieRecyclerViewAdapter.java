@@ -16,15 +16,16 @@ import java.util.List;
 
 import static com.artamonov.popularmovies.MainActivity.TAG;
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-    private ItemClickListener listener;
+public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecyclerViewAdapter.ViewHolder> {
+    private static ItemClickListener listener;
     private List<PopularMovies> popularMoviesList;
     private Context mContext;
 
-    public RecyclerViewAdapter(Context context, List<PopularMovies> popularMovies, ItemClickListener listener) {
+    public MovieRecyclerViewAdapter(Context context, List<PopularMovies> popularMoviesList, ItemClickListener itemClickListener) {
         this.mContext = context;
-        this.listener = listener;
-        popularMoviesList = popularMovies;
+        listener = itemClickListener;
+        this.popularMoviesList = popularMoviesList;
+        Log.i(TAG, " Adapter is constructed ");
     }
 
     @NonNull
@@ -37,7 +38,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int position) {
-
+        Log.i(TAG, " onBindViewHolder " + position);
         PopularMovies popularMovies = popularMoviesList.get(position);
 
         if (!TextUtils.isEmpty(popularMovies.getPosterPath())) {
@@ -62,7 +63,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         void onItemClick(int position);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView imageView;
 
         ViewHolder(View itemView) {

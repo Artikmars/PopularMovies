@@ -28,20 +28,20 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity implements RecyclerViewAdapter.ItemClickListener {
+public class MainActivity extends AppCompatActivity implements MovieRecyclerViewAdapter.ItemClickListener {
 
     public static final String TAG = "myLogs";
 
     //Enter your API key here only once
-    private static final String API_KEY = "";
+    public static final String API_KEY = "";
 
     private static String mostPopularUrl = "http://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY + "&language=en-US&page=1";
     private static String topRatedURL = "https://api.themoviedb.org/3/movie/top_rated?api_key=" + API_KEY + "&language=en-US&page=1";
-    Request request;
-    String responseJSON;
+    public static Request request;
+    public  static String responseJSON;
     CharSequence[] values = {"Most Popular", "Top Rated"};
 
-    private RecyclerView recyclerView;
+    private RecyclerView rvMovies;
     private List<PopularMovies> popularMoviesList;
     private AlertDialog alertDialog;
 
@@ -51,16 +51,17 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        recyclerView = findViewById(R.id.rvMovies);
+        rvMovies = findViewById(R.id.rvMovies);
 
         setSupportActionBar(toolbar);
 
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        rvMovies.setLayoutManager(new GridLayoutManager(this, 2));
         getJSONData(mostPopularUrl);
+
 
     }
 
-    private void getJSONData(String url) {
+    public void getJSONData(String url) {
 
         if (isNetworkAvailable()) {
             OkHttpClient okHttpClient = new OkHttpClient();
@@ -111,8 +112,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
 
     private void parseJSONData(String responseJSON) {
         popularMoviesList = PopularMoviesParsing.parseMoviesJSON(responseJSON);
-        RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(MainActivity.this, popularMoviesList, this);
-        recyclerView.setAdapter(recyclerViewAdapter);
+        MovieRecyclerViewAdapter movieRecyclerViewAdapter =
+                new MovieRecyclerViewAdapter(MainActivity.this, popularMoviesList, this);
+        rvMovies.setAdapter(movieRecyclerViewAdapter);
     }
 
     @Override
@@ -169,13 +171,17 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
     @Override
     public void onItemClick(int position) {
 
+        Integer id = popularMoviesList.get(position).getId();
+        Log.i(TAG, "In MainActivity: id" + id);
         String title = popularMoviesList.get(position).getTitle();
         String releaseDate = popularMoviesList.get(position).getReleaseDate();
         String voteAverage = popularMoviesList.get(position).getVoteAverage();
+        Log.i(TAG, "In MainActivity: voteAverage" + voteAverage);
         String overview = popularMoviesList.get(position).getOverview();
         String posterPath = popularMoviesList.get(position).getPosterPath();
 
         Intent intent = new Intent(this, MovieDetailActivity.class);
+        intent.putExtra("id", id);
         intent.putExtra("releaseDate", releaseDate);
         intent.putExtra("voteAverage", voteAverage);
         intent.putExtra("overview", overview);

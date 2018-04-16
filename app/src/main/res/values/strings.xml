@@ -6,4 +6,9 @@
     <string name="title">Title</string>
     <string name="release_date">23.06.2018</string>
     <string name="vote_average">10</string>
+    <string name="trailer">Trailer #</string>
+    <string name="trailer_number">1</string>
+    <string name="trailer_name"> The Shawshank Redemption - Trailer</string>
+    <string name="trailer_quality"> 1080p </string>
+
 </resources>
