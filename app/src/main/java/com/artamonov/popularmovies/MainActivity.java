@@ -35,8 +35,8 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     //Enter your API key here only once
     public static final String API_KEY = "";
 
-    private static String mostPopularUrl = "http://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY + "&language=en-US&page=1";
-    private static String topRatedURL = "https://api.themoviedb.org/3/movie/top_rated?api_key=" + API_KEY + "&language=en-US&page=1";
+    private static String mostPopularUrl = "http://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY + "&language=en-US";
+    private static String topRatedURL = "https://api.themoviedb.org/3/movie/top_rated?api_key=" + API_KEY + "&language=en-US";
     public static Request request;
     public  static String responseJSON;
     CharSequence[] values = {"Most Popular", "Top Rated"};
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
 
     public void getJSONData(String url) {
 
-        if (isNetworkAvailable()) {
+        if (NetworkUtils.isNetworkAvailable(getApplicationContext())) {
             OkHttpClient okHttpClient = new OkHttpClient();
             request = new Request.Builder()
                     .url(url)
@@ -101,12 +101,16 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
 
                     } else {
                         Log.i(TAG, "Response is not successful ");
+                        Toast.makeText(getApplicationContext(), "Response is not successful",
+                                Toast.LENGTH_SHORT).show();
                     }
                 }
             });
 
         } else {
             Log.i(TAG, "No Internet Connection");
+            Toast.makeText(getApplicationContext(), "Please check your Internet connection",
+                    Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -160,13 +164,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     }
 
 
-    public boolean isNetworkAvailable() {
 
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null;
-    }
 
 
     @Override

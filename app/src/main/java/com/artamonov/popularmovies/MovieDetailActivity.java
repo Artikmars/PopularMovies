@@ -3,8 +3,6 @@ package com.artamonov.popularmovies;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +11,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -44,6 +44,7 @@ import static com.artamonov.popularmovies.MainActivity.responseJSON;
 public class MovieDetailActivity extends AppCompatActivity {
 
     private static String movieTrailersURL;
+    private static String movieReviewsURL;
     ImageView ivDetailPoster;
     TextView tvOverview;
     TextView tvVoteAverage;
@@ -61,6 +62,8 @@ public class MovieDetailActivity extends AppCompatActivity {
     Spinner sMovieTrailers;
     int movieID;
     List<PopularMovies> movieTrailers = new ArrayList<>();
+    private static List<PopularMovies> movieReviews = new ArrayList<>();
+    private RecyclerView rvReviews;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,6 +83,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         tvTitle = findViewById(R.id.tvTitle);
         sMovieTrailers = findViewById(R.id.sMovieTrailers);
         ibPlay = findViewById(R.id.ibPlay);
+        rvReviews = findViewById(R.id.rvReviews);
 
 
         Intent intent = getIntent();
@@ -106,17 +110,19 @@ public class MovieDetailActivity extends AppCompatActivity {
         movieID = intent.getIntExtra("id", 1);
         Log.i(MainActivity.TAG, "id " + movieID);
         movieTrailersURL = "https://api.themoviedb.org/3/movie/" + movieID + "/videos?api_key=" + API_KEY + "&language=en-US";
-        Log.i(MainActivity.TAG, "movieTrailersURL" + movieTrailersURL);
+       // Log.i(MainActivity.TAG, "movieTrailersURL" + movieTrailersURL);
 
         getJSONMovieTrailers(movieTrailersURL);
-        Log.i(MainActivity.TAG, "movieTrailers" + movieTrailers.toString());
+        //Log.i(MainActivity.TAG, "movieTrailers" + movieTrailers.toString());
 
+        rvReviews.setLayoutManager(new LinearLayoutManager(this));
+        movieReviewsURL = "https://api.themoviedb.org/3/movie/" + movieID + "/reviews?api_key=" + API_KEY + "&language=en-US";
+        getJSONMovieReviews(movieReviewsURL);
     }
 
     public void getJSONMovieTrailers(String url) {
 
-        //MainActivity ma = new MainActivity();
-        if (isNetworkAvailable()) {
+        if (NetworkUtils.isNetworkAvailable(getApplicationContext())) {
             OkHttpClient okHttpClient = new OkHttpClient();
             MainActivity.request = new Request.Builder()
                     .url(url)
@@ -163,15 +169,86 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     }
 
+    public void getJSONMovieReviews(String url) {
 
-    public boolean isNetworkAvailable() {
+        if (NetworkUtils.isNetworkAvailable(getApplicationContext())) {
+            OkHttpClient okHttpClient = new OkHttpClient();
+            MainActivity.request = new Request.Builder()
+                    .url(url)
+                    .build();
 
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null;
+            okHttpClient.newCall(MainActivity.request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    Log.i(MainActivity.TAG, "onFailure: " + e);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Check your Internet connection or try later",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+
+                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    Log.i(MainActivity.TAG, "response: " + response.message());
+                    if (response.isSuccessful()) {
+                        responseJSON = response.body().string();
+                        Log.i(MainActivity.TAG, "responseJSON: " + responseJSON);
+
+                        runOnUiThread(new Runnable() {
+                                          @Override
+                                          public void run() {
+                                              movieReviews = parseJSONMovieReviews(responseJSON);
+                                              MovieReviewsRecyclerViewAdapter movieReviewsRecyclerViewAdapter =
+                                                      new MovieReviewsRecyclerViewAdapter(MovieDetailActivity.this,
+                                                              movieReviews);
+                                              rvReviews.setAdapter(movieReviewsRecyclerViewAdapter);
+                                          }
+                                      }
+                        );
+
+                    } else {
+                        Log.i(MainActivity.TAG, "Response is not successful ");
+                    }
+                }
+            });
+
+        } else {
+            Log.i(MainActivity.TAG, "No Internet Connection");
+        }
+
     }
 
+    private static List<PopularMovies> parseJSONMovieReviews(String responseJSON) {
+
+        try {
+            JSONObject jsonObject = new JSONObject(responseJSON);
+            JSONArray resultsJsonArray = jsonObject.getJSONArray("results");
+            if (resultsJsonArray.length() != 0) {
+
+                movieReviews = new ArrayList<>();
+                for (int i = 0; i < resultsJsonArray.length(); i++) {
+                    JSONObject movieReviewObject = resultsJsonArray.getJSONObject(i);
+                    String reviewAuthor = movieReviewObject.optString("author");
+                    String reviewContent = movieReviewObject.optString("content");
+
+                    PopularMovies popularMovies = new PopularMovies();
+                    popularMovies.setReviewAuthor(reviewAuthor);
+                    popularMovies.setReviewContent(reviewContent);
+                    movieReviews.add(popularMovies);
+                }
+
+
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return movieReviews;
+
+    }
 
     private void parseJSONMovieTrailers(String responseJSON) {
         try {

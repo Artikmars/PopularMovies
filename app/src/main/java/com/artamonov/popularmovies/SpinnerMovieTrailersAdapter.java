@@ -57,10 +57,9 @@ public class SpinnerMovieTrailersAdapter extends ArrayAdapter<String> {
 
         String qualityString = popularMovies.getTrailerQuality();
         trailerQuality.setText(qualityString);
-        Integer quality = Integer.parseInt(qualityString);
-        if (quality == 1080)
+        if (qualityString.equals("1080"))
             trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.green));
-        else if (quality == 720)
+        else if (qualityString.equals("720"))
             trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.yellow));
         else
             trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.red));

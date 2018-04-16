@@ -14,10 +14,27 @@ public class PopularMovies {
     private String trailerName;
     private String trailerQuality;
 
-
+    private String reviewContent;
+    private String reviewAuthor;
 
     public PopularMovies() {
 
+    }
+
+    public String getReviewAuthor() {
+        return reviewAuthor;
+    }
+
+    public void setReviewAuthor(String reviewAuthor) {
+        this.reviewAuthor = reviewAuthor;
+    }
+
+    public String getReviewContent() {
+        return reviewContent;
+    }
+
+    public void setReviewContent(String reviewContent) {
+        this.reviewContent = reviewContent;
     }
 
     public String getTrailerQuality() {
