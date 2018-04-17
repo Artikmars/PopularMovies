@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -43,13 +45,8 @@ import static com.artamonov.popularmovies.MainActivity.responseJSON;
 
 public class MovieDetailActivity extends AppCompatActivity {
 
-    private static String movieTrailersURL;
-    private static String movieReviewsURL;
-    ImageView ivDetailPoster;
-    TextView tvOverview;
-    TextView tvVoteAverage;
-    TextView tvReleaseDate;
-    TextView tvTitle;
+    private static List<PopularMovies> movieReviews = new ArrayList<>();
+    List<PopularMovies> movieTrailers = new ArrayList<>();
 
     TextView trailerName;
     TextView trailerNumber;
@@ -57,34 +54,71 @@ public class MovieDetailActivity extends AppCompatActivity {
     TextView tvTrailer;
 
     ImageView ibPlay;
+    Spinner sMovieTrailers;
+
+    @BindView(R.id.ivDetailPoster)
+    ImageView ivDetailPoster;
+    @BindView(R.id.rvReviews)
+    RecyclerView rvReviews;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.tvOverview)
+    TextView tvOverview;
+    @BindView(R.id.tvVoteAverage)
+    TextView tvVoteAverage;
+    @BindView(R.id.tvReleaseDate)
+    TextView tvReleaseDate;
+    @BindView(R.id.tvTitle)
+    TextView tvTitle;
 
     Context context;
-    Spinner sMovieTrailers;
     int movieID;
-    List<PopularMovies> movieTrailers = new ArrayList<>();
-    private static List<PopularMovies> movieReviews = new ArrayList<>();
-    private RecyclerView rvReviews;
+
+    private static List<PopularMovies> parseJSONMovieReviews(String responseJSON) {
+
+        try {
+            JSONObject jsonObject = new JSONObject(responseJSON);
+            JSONArray resultsJsonArray = jsonObject.getJSONArray("results");
+            movieReviews = new ArrayList<>();
+            if (resultsJsonArray.length() != 0) {
+                for (int i = 0; i < resultsJsonArray.length(); i++) {
+                    JSONObject movieReviewObject = resultsJsonArray.getJSONObject(i);
+                    String reviewAuthor = movieReviewObject.optString("author");
+                    String reviewContent = movieReviewObject.optString("content");
+
+                    PopularMovies popularMovies = new PopularMovies();
+                    popularMovies.setReviewAuthor(reviewAuthor);
+                    popularMovies.setReviewContent(reviewContent);
+                    movieReviews.add(popularMovies);
+                }
+
+            } else {
+                Log.i(MainActivity.TAG, "No reviews");
+                PopularMovies popularMovies = new PopularMovies();
+                popularMovies.setReviewAuthor("No reviews yet");
+                movieReviews.add(popularMovies);
+
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return movieReviews;
+
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.movie_detail_activity);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         ivDetailPoster = findViewById(R.id.ivDetailPoster);
-        tvOverview = findViewById(R.id.tvOverview);
-        tvReleaseDate = findViewById(R.id.tvReleaseDate);
-        tvVoteAverage = findViewById(R.id.tvVoteAverage);
-        tvTitle = findViewById(R.id.tvTitle);
         sMovieTrailers = findViewById(R.id.sMovieTrailers);
         ibPlay = findViewById(R.id.ibPlay);
-        rvReviews = findViewById(R.id.rvReviews);
-
 
         Intent intent = getIntent();
         Picasso.with(context)
@@ -108,15 +142,16 @@ public class MovieDetailActivity extends AppCompatActivity {
         tvOverview.setText(intent.getStringExtra("overview"));
 
         movieID = intent.getIntExtra("id", 1);
+        Log.i(MainActivity.TAG, "movieID" + movieID);
         Log.i(MainActivity.TAG, "id " + movieID);
-        movieTrailersURL = "https://api.themoviedb.org/3/movie/" + movieID + "/videos?api_key=" + API_KEY + "&language=en-US";
-       // Log.i(MainActivity.TAG, "movieTrailersURL" + movieTrailersURL);
+        String movieTrailersURL = "https://api.themoviedb.org/3/movie/" + movieID + "/videos?api_key=" + API_KEY + "&language=en-US";
+        // Log.i(MainActivity.TAG, "movieTrailersURL" + movieTrailersURL);
 
         getJSONMovieTrailers(movieTrailersURL);
         //Log.i(MainActivity.TAG, "movieTrailers" + movieTrailers.toString());
 
         rvReviews.setLayoutManager(new LinearLayoutManager(this));
-        movieReviewsURL = "https://api.themoviedb.org/3/movie/" + movieID + "/reviews?api_key=" + API_KEY + "&language=en-US";
+        String movieReviewsURL = "https://api.themoviedb.org/3/movie/" + movieID + "/reviews?api_key=" + API_KEY + "&language=en-US";
         getJSONMovieReviews(movieReviewsURL);
     }
 
@@ -147,7 +182,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                     Log.i(MainActivity.TAG, "response: " + response.message());
                     if (response.isSuccessful()) {
                         responseJSON = response.body().string();
-                        Log.i(MainActivity.TAG, "responseJSON: " + responseJSON);
+                        Log.i(MainActivity.TAG, "responseJSON Trailers : " + responseJSON);
 
                         runOnUiThread(new Runnable() {
                                           @Override
@@ -196,7 +231,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                     Log.i(MainActivity.TAG, "response: " + response.message());
                     if (response.isSuccessful()) {
                         responseJSON = response.body().string();
-                        Log.i(MainActivity.TAG, "responseJSON: " + responseJSON);
+                        Log.i(MainActivity.TAG, "responseJSON Reviews: " + responseJSON);
 
                         runOnUiThread(new Runnable() {
                                           @Override
@@ -212,6 +247,7 @@ public class MovieDetailActivity extends AppCompatActivity {
 
                     } else {
                         Log.i(MainActivity.TAG, "Response is not successful ");
+
                     }
                 }
             });
@@ -219,34 +255,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         } else {
             Log.i(MainActivity.TAG, "No Internet Connection");
         }
-
-    }
-
-    private static List<PopularMovies> parseJSONMovieReviews(String responseJSON) {
-
-        try {
-            JSONObject jsonObject = new JSONObject(responseJSON);
-            JSONArray resultsJsonArray = jsonObject.getJSONArray("results");
-            if (resultsJsonArray.length() != 0) {
-
-                movieReviews = new ArrayList<>();
-                for (int i = 0; i < resultsJsonArray.length(); i++) {
-                    JSONObject movieReviewObject = resultsJsonArray.getJSONObject(i);
-                    String reviewAuthor = movieReviewObject.optString("author");
-                    String reviewContent = movieReviewObject.optString("content");
-
-                    PopularMovies popularMovies = new PopularMovies();
-                    popularMovies.setReviewAuthor(reviewAuthor);
-                    popularMovies.setReviewContent(reviewContent);
-                    movieReviews.add(popularMovies);
-                }
-
-
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return movieReviews;
 
     }
 
@@ -270,6 +278,11 @@ public class MovieDetailActivity extends AppCompatActivity {
                     movieTrailers.add(popularMovies);
                 }
 
+            } else {
+                Log.i(MainActivity.TAG, "No trailers");
+                PopularMovies popularMovies = new PopularMovies();
+                popularMovies.setTrailerName("No trailers");
+                movieTrailers.add(popularMovies);
             }
 
             SpinnerMovieTrailersAdapter adapter = new SpinnerMovieTrailersAdapter(this,
@@ -278,12 +291,12 @@ public class MovieDetailActivity extends AppCompatActivity {
             sMovieTrailers.setAdapter(adapter);
             sMovieTrailers.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                    ConstraintLayout constraintLayout = view.findViewById(R.id.movieTrailersLayout);
+
 
                     trailerName = findViewById(R.id.trailerName);
                     trailerNumber = findViewById(R.id.trailerNumber);
                     trailerQuality = findViewById(R.id.trailerQuality);
-                    tvTrailer = findViewById(R.id.tvTrailer);
-                    ConstraintLayout constraintLayout = view.findViewById(R.id.movieTrailersLayout);
 
                     PopularMovies popularMovies = movieTrailers.get(pos);
                     trailerName.setText(popularMovies.getTrailerName());
@@ -316,7 +329,6 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     }
 
-
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
@@ -324,18 +336,28 @@ public class MovieDetailActivity extends AppCompatActivity {
     }
 
     public void playTrailer(View view) {
-        Integer position = Integer.parseInt(trailerNumber.getText().toString()) - 1;
-        PopularMovies popularMovies = movieTrailers.get(position);
-        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + popularMovies.getTrailerKey()));
-        Intent webIntent = new Intent(Intent.ACTION_VIEW,
-                Uri.parse("http://www.youtube.com/watch?v=" + popularMovies.getTrailerKey()));
-        try {
 
-            startActivity(appIntent);
+        if (movieTrailers.size() != 1) {
+            Integer position = Integer.parseInt(trailerNumber.getText().toString()) - 1;
+            PopularMovies popularMovies = movieTrailers.get(position);
+            Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + popularMovies.getTrailerKey()));
+            Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://www.youtube.com/watch?v=" + popularMovies.getTrailerKey()));
+            try {
 
-        } catch (ActivityNotFoundException ex) {
-            startActivity(webIntent);
+                startActivity(appIntent);
 
+            } catch (ActivityNotFoundException ex) {
+                startActivity(webIntent);
+
+            }
+        } else {
+            Log.i(MainActivity.TAG, "playTrailer - No trailers");
+            ibPlay.setEnabled(false);
+            Toast.makeText(getApplicationContext(), "No trailers to play", Toast.LENGTH_SHORT).show();
         }
+
     }
+
+
 }

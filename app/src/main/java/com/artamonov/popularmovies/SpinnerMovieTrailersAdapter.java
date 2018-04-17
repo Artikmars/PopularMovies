@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.List;
@@ -43,26 +44,32 @@ public class SpinnerMovieTrailersAdapter extends ArrayAdapter<String> {
 
     private View createItemView(int position, View convertView, ViewGroup parent) {
         final View view = layoutInflater.inflate(resource, parent, false);
-
         TextView trailerName = view.findViewById(R.id.trailerName);
         TextView trailerNumber = view.findViewById(R.id.trailerNumber);
         TextView trailerQuality = view.findViewById(R.id.trailerQuality);
+        if (movieTrailersList.size() != 1) {
 
+            PopularMovies popularMovies = movieTrailersList.get(position);
+            trailerName.setText(popularMovies.getTrailerName());
+            Integer currentPosition = position + 1;
+            trailerNumber.setText(String.valueOf(currentPosition));
 
-        PopularMovies popularMovies = movieTrailersList.get(position);
-
-        trailerName.setText(popularMovies.getTrailerName());
-        Integer currentPosition = position + 1;
-        trailerNumber.setText(String.valueOf(currentPosition));
-
-        String qualityString = popularMovies.getTrailerQuality();
-        trailerQuality.setText(qualityString);
-        if (qualityString.equals("1080"))
-            trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.green));
-        else if (qualityString.equals("720"))
-            trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.yellow));
-        else
-            trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.red));
+            String qualityString = popularMovies.getTrailerQuality();
+            trailerQuality.setText(qualityString);
+            if (qualityString.equals("1080"))
+                trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.green));
+            else if (qualityString.equals("720"))
+                trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.yellow));
+            else
+                trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.red));
+        } else {
+            TextView trailerLabel = view.findViewById(R.id.tvTrailer);
+            Spinner spinner = view.findViewById(R.id.sMovieTrailers);
+            trailerLabel.setText(context.getResources().getString(R.string.no_trailers));
+            trailerNumber.setText(null);
+            spinner.setEnabled(false);
+            spinner.setClickable(false);
+        }
         return view;
     }
 

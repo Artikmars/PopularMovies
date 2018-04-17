@@ -15,5 +15,7 @@
     <string name="review_author"> Cronus</string>
     <string name="review_content"> This is a nice movie! </string>
     <string name="reviews"> Reviews </string>
+    <string name="no_reviews"> No reviews yet</string>
+    <string name="no_trailers"> No trailers</string>
 
 </resources>

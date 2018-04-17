@@ -1,10 +1,7 @@
 package com.artamonov.popularmovies;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,26 +19,29 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+
 public class MainActivity extends AppCompatActivity implements MovieRecyclerViewAdapter.ItemClickListener {
 
     public static final String TAG = "myLogs";
-
     //Enter your API key here only once
     public static final String API_KEY = "";
-
+    public static Request request;
+    public static String responseJSON;
     private static String mostPopularUrl = "http://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY + "&language=en-US";
     private static String topRatedURL = "https://api.themoviedb.org/3/movie/top_rated?api_key=" + API_KEY + "&language=en-US";
-    public static Request request;
-    public  static String responseJSON;
-    CharSequence[] values = {"Most Popular", "Top Rated"};
 
-    private RecyclerView rvMovies;
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.rvMovies) RecyclerView rvMovies;
+
+    CharSequence[] values = {"Most Popular", "Top Rated"};
     private List<PopularMovies> popularMoviesList;
     private AlertDialog alertDialog;
 
@@ -49,17 +49,10 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        rvMovies = findViewById(R.id.rvMovies);
-
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-
         rvMovies.setLayoutManager(new GridLayoutManager(this, 2));
-
         getJSONData(mostPopularUrl);
-
-
     }
 
     public void getJSONData(String url) {
@@ -89,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
                     Log.i(TAG, "response: " + response.message());
                     if (response.isSuccessful()) {
                         responseJSON = response.body().string();
-                        Log.i(TAG, "responseJSON: " + responseJSON);
+                        Log.i(TAG, "responseJSON - MainActivity: " + responseJSON);
 
                         runOnUiThread(new Runnable() {
                                           @Override
@@ -101,16 +94,26 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
 
                     } else {
                         Log.i(TAG, "Response is not successful ");
-                        Toast.makeText(getApplicationContext(), "Response is not successful",
-                                Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "Response is not successful",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 }
             });
 
         } else {
             Log.i(TAG, "No Internet Connection");
-            Toast.makeText(getApplicationContext(), "Please check your Internet connection",
-                    Toast.LENGTH_SHORT).show();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Please check your Internet connection",
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
         }
 
     }
@@ -162,9 +165,6 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         alertDialog = builder.create();
         alertDialog.show();
     }
-
-
-
 
 
     @Override

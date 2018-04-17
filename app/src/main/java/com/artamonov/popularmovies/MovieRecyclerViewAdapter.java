@@ -47,7 +47,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
                     .load(popularMovies.getPosterPath())
                     .placeholder(R.drawable.placeholder)
                     .error(R.drawable.placeholder_error)
-                    .into(viewHolder.imageView);
+                    .into(viewHolder.ivPoster);
         } else {
             Log.i(TAG, "popularMovies.getPosterPath() is Empty");
         }
@@ -64,11 +64,11 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private ImageView imageView;
+        private ImageView ivPoster;
 
         ViewHolder(View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.ivPoster);
+            ivPoster = itemView.findViewById(R.id.ivPoster);
             itemView.setOnClickListener(this);
         }
 
