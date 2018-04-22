@@ -29,6 +29,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import de.cketti.library.changelog.ChangeLog;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -53,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     Toolbar toolbar;
     @BindView(R.id.rvMovies)
     RecyclerView rvMovies;
-    private final CharSequence[] values = {"Sort by Most Popular", "Sort by Top Rated", "Favorites"};
+    private CharSequence[] values;
     //  ArrayList<PopularMovies> dbPopularMoviesList = new ArrayList<>();
     private Bitmap posterImage;
     private List<PopularMovies> popularMoviesList;
@@ -68,6 +69,11 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ChangeLog cl = new ChangeLog(this);
+        if (cl.isFirstRun()) {
+            cl.getLogDialog().show();
+        }
         ButterKnife.bind(this);
         dbHelper = new DBHelper(this);
         Log.i(TAG, "dbVersion: " + DBHelper.DB_VERSION);
@@ -175,7 +181,8 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     private void showAlertDialog() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle("Choose your thumbnails: ");
+        builder.setTitle(R.string.sort_title);
+        values = getResources().getStringArray(R.array.sort_array);
         builder.setSingleChoiceItems(values, -1, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int item) {

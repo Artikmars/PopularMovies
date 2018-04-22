@@ -13,8 +13,8 @@
 
             <Spinner
                 android:id="@+id/sMovieTrailers"
-                android:layout_width="162dp"
-                android:layout_height="34dp"
+                android:layout_width="199dp"
+                android:layout_height="39dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:spinnerMode="dialog"
@@ -34,6 +34,18 @@
                 app:layout_constraintStart_toEndOf="@+id/sMovieTrailers"
                 app:layout_constraintTop_toBottomOf="@+id/tvTrailers"
                 app:srcCompat="@android:drawable/ic_media_play" />
+
+            <ImageView
+                android:id="@+id/ivShare"
+                android:layout_width="57dp"
+                android:layout_height="39dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@string/share"
+                android:onClick="onShareTrailerClick"
+                app:layout_constraintStart_toEndOf="@+id/ibPlay"
+                app:layout_constraintTop_toBottomOf="@+id/tvTrailers"
+                app:srcCompat="@drawable/ic_share_black_24dp" />
 
             <include
                 android:id="@+id/toolbar"
@@ -160,8 +172,8 @@
                 android:layout_width="47dp"
                 android:layout_height="45dp"
                 android:layout_marginEnd="72dp"
-                android:contentDescription="@string/favorites"
                 android:layout_marginTop="28dp"
+                android:contentDescription="@string/favorites"
                 android:onClick="onFavoritesClick"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvVoteAverage"
@@ -169,15 +181,18 @@
 
             <TextView
                 android:id="@+id/tvFavorites"
-                android:layout_width="wrap_content"
+                android:layout_width="125dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="28dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="@string/add_favorites"
+                android:text="@string/favorites"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.764"
                 app:layout_constraintStart_toEndOf="@+id/ivDetailPoster"
                 app:layout_constraintTop_toBottomOf="@+id/ivFavorites" />
+
+
         </android.support.constraint.ConstraintLayout>
     </ScrollView>
 </layout>

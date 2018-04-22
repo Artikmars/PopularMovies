@@ -21,6 +21,14 @@
     <string name="clean_db"> Clean Favorites</string>
     <string name="play_button">Play Button</string>
     <string name="poster">Movie Poster</string>
+    <string name="share">Share Button</string>
+    <string name="sort_title">Choose your thumbnails:</string>
+
+    <string-array name="sort_array">
+        <item>Sort by Most Popular</item>
+        <item>Sort by Top Rated</item>
+        <item>Favorites</item>
+    </string-array>
 
 
 </resources>

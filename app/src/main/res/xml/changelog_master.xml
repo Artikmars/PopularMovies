@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<changelog>
+    <release version="1.22" versioncode="6" >
+    <change>Russian Language Support</change>
+    </release>
+    <release version="1.21" versioncode="5" >
+        <change>Share Trailers Functionality</change>
+    </release>
+    <release version="1.2" versioncode="4" >
+        <change>Allows to put your favorite movie to Favorites</change>
+        <change>Offline mode: with Favorites</change>
+    </release>
+    <release version="1.0" versioncode="1">
+        <change>First release</change>
+    </release>
+</changelog>

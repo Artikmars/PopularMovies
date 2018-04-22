@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Популярные Фильмы</string>
+    <string name="sort">Сортировать</string>
+    <string name="overview">Описание</string>
+    <string name="title">Заголовок</string>
+    <string name="trailer">Трейлер #</string>
+    <string name="pick_trailer">Выберите трейлер</string>
+    <string name="reviews">Рецензии</string>
+    <string name="no_reviews">Рецензий пока нет</string>
+    <string name="no_trailers">Нет трейлеров</string>
+    <string name="add_favorites">В избранное</string>
+    <string name="favorites">Избранное</string>
+    <string name="clean_db">Очистить избранное</string>
+    <string name="trailers">Трейлеры</string>
+    <string name="sort_title">Сортировать по:</string>
+
+    <string-array name="sort_array">
+        <item>Популярности</item>
+        <item>Рейтингу</item>
+        <item>Избранное</item>
+    </string-array>
+
+</resources>

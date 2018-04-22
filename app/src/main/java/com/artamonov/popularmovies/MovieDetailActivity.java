@@ -58,6 +58,8 @@ public class MovieDetailActivity extends AppCompatActivity {
     private TextView trailerName, trailerNumber, trailerQuality, tvTrailer;
     private final List<PopularMovies> movieTrailers = new ArrayList<>();
     private String detailMovieTitle, detailMovieVoteAverage, detailMovieReleaseDate, detailMovieOverview;
+    private String shareTrailerLink;
+    private String shareTrailerTitle;
 
 
     @Override
@@ -253,14 +255,20 @@ public class MovieDetailActivity extends AppCompatActivity {
             binding.sMovieTrailers.setAdapter(adapter);
             binding.sMovieTrailers.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+
                     ConstraintLayout constraintLayout = view.findViewById(R.id.movieTrailersLayout);
-                    trailerName = findViewById(R.id.trailerName);
-                    trailerNumber = findViewById(R.id.trailerNumber);
-                    trailerQuality = findViewById(R.id.trailerQuality);
                     tvTrailer = findViewById(R.id.tvTrailer);
+                    trailerNumber = findViewById(R.id.trailerNumber);
+                    trailerName = findViewById(R.id.trailerName);
+                    trailerQuality = findViewById(R.id.trailerQuality);
+                    trailerName.setText(null);
+                    trailerQuality.setText(null);
 
                     PopularMovies popularMovies = movieTrailers.get(pos);
-                    trailerName.setText(popularMovies.getTrailerName());
+
+                    shareTrailerLink = popularMovies.getTrailerKey();
+                    shareTrailerTitle = popularMovies.getTrailerName();
+                  //  trailerName.setText(popularMovies.getTrailerName());
                     Integer currentPosition = pos + 1;
                     trailerNumber.setText(String.valueOf(currentPosition));
                     if (popularMovies.getTrailerQuality() != null) {
@@ -281,6 +289,8 @@ public class MovieDetailActivity extends AppCompatActivity {
                 }
 
                 public void onNothingSelected(AdapterView<?> parent) {
+                    trailerName = findViewById(R.id.trailerName);
+                    trailerQuality = findViewById(R.id.trailerQuality);
                     trailerName.setText(null);
                     trailerNumber.setText(null);
                     trailerQuality.setText(null);
@@ -441,4 +451,12 @@ public class MovieDetailActivity extends AppCompatActivity {
     }
 
 
+    public void onShareTrailerClick(View view) {
+        Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        String shareBody = "https://www.youtube.com/watch?v=" + shareTrailerLink;
+        intent.putExtra(android.content.Intent.EXTRA_SUBJECT, shareTrailerTitle);
+        intent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+        startActivity(Intent.createChooser(intent, "Choose Sharing Method"));
+    }
 }
