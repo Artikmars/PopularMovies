@@ -51,16 +51,65 @@ import static com.artamonov.popularmovies.MainActivity.sqLiteDatabase;
 public class MovieDetailActivity extends AppCompatActivity {
 
     private static List<PopularMovies> movieReviews = new ArrayList<>();
-    private MovieDetailActivityBinding binding;
+    private final List<PopularMovies> movieTrailers = new ArrayList<>();
     Context context;
+    private MovieDetailActivityBinding binding;
     private int detailMovieID;
     private Bitmap detailMoviePosterImage;
-    private TextView trailerName, trailerNumber, trailerQuality, tvTrailer;
-    private final List<PopularMovies> movieTrailers = new ArrayList<>();
+    private TextView trailerName, trailerQuality, tvTrailer;
     private String detailMovieTitle, detailMovieVoteAverage, detailMovieReleaseDate, detailMovieOverview;
     private String shareTrailerLink;
     private String shareTrailerTitle;
+    private int spinnerCurrentPressedPosition;
 
+    private static List<PopularMovies> parseJSONMovieReviews(String responseJSON) {
+
+        try {
+            JSONObject jsonObject = new JSONObject(responseJSON);
+            JSONArray resultsJsonArray = jsonObject.getJSONArray("results");
+            movieReviews = new ArrayList<>();
+            if (resultsJsonArray.length() != 0) {
+                for (int i = 0; i < resultsJsonArray.length(); i++) {
+                    JSONObject movieReviewObject = resultsJsonArray.getJSONObject(i);
+                    String reviewAuthor = movieReviewObject.optString("author");
+                    String reviewContent = movieReviewObject.optString("content");
+
+                    PopularMovies popularMovies = new PopularMovies();
+                    popularMovies.setReviewAuthor(reviewAuthor);
+                    popularMovies.setReviewContent(reviewContent);
+                    movieReviews.add(popularMovies);
+                }
+
+            } else {
+                Log.i(MainActivity.TAG, "No reviews");
+                PopularMovies popularMovies = new PopularMovies();
+                popularMovies.setReviewAuthor("No reviews yet");
+                movieReviews.add(popularMovies);
+
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return movieReviews;
+
+    }
+
+    private static boolean isFavorite(Integer detailMovieID) {
+        Log.i(MainActivity.TAG, "IN isFavorite");
+        String checkQuery = "SELECT * FROM " + DBContract.DBEntry.TABLE_NAME + " WHERE " +
+                DBContract.DBEntry.COLUMN_MOVIE_ID + " = " + detailMovieID;
+        Log.i(MainActivity.TAG, "checkQuery: " + checkQuery);
+
+        Cursor cursor = sqLiteDatabase.rawQuery(checkQuery, null);
+        Log.i(MainActivity.TAG, "cursor.getCount()" + cursor.getCount());
+        if (cursor.getCount() <= 0) {
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        //  sqLiteDatabase.close();
+        return true;
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,20 +124,29 @@ public class MovieDetailActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
 
-        detailMovieReleaseDate = intent.getStringExtra("releaseDate");
-        //  String[] releaseDateArray = releaseDate.split("-");
-        //  for (int i = 0; i < releaseDateArray.length; i++) {
-        //Log.i(MainActivity.TAG, "releaseDateArray [" + i + "]: " + releaseDateArray[i]);
-        // detailMovieReleaseDate = releaseDateArray[i] + "."; }
+        String releaseDateFromIntent = intent.getStringExtra("releaseDate");
+        String[] releaseDateArray = releaseDateFromIntent.split("-");
+        if (releaseDateArray.length > 1) {
+            detailMovieReleaseDate = releaseDateArray[2] + "." + releaseDateArray[1] + "." +
+                    releaseDateArray[0];
+            binding.tvReleaseDate.setText(detailMovieReleaseDate);
+        } else {
+            detailMovieReleaseDate = releaseDateFromIntent;
+        }
 
-        // String voteAverage = intent.getStringExtra("voteAverage");
-        //detailMovieVoteAverage = voteAverage + "/10";
+       /* for (int i = 0; i < releaseDateArray.length; i++) {
+            Log.i(MainActivity.TAG, "releaseDateArray [" + i + "]: " + releaseDateArray[i]);
+            detailMovieReleaseDate = releaseDateArray[i] + ".";
+        }*/
+
+        String voteAverage = intent.getStringExtra("voteAverage");
+        String voteAverageOutOfTen = voteAverage + "/10";
         detailMovieVoteAverage = intent.getStringExtra("voteAverage");
         detailMovieTitle = intent.getStringExtra("title");
         Log.i(MainActivity.TAG, "MovieDetail = onCreate - title: " + detailMovieTitle);
         binding.tvTitle.setText(detailMovieTitle);
-        binding.tvReleaseDate.setText(detailMovieReleaseDate);
-        binding.tvVoteAverage.setText(detailMovieVoteAverage);
+
+        binding.tvVoteAverage.setText(voteAverageOutOfTen);
         detailMovieOverview = (intent.getStringExtra("overview"));
         binding.tvOverview.setText(detailMovieOverview);
         detailMovieID = intent.getIntExtra("id", 1);
@@ -117,7 +175,6 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         }
     }
-
 
     private void getJSONMovieTrailers(String url) {
 
@@ -258,19 +315,22 @@ public class MovieDetailActivity extends AppCompatActivity {
 
                     ConstraintLayout constraintLayout = view.findViewById(R.id.movieTrailersLayout);
                     tvTrailer = findViewById(R.id.tvTrailer);
-                    trailerNumber = findViewById(R.id.trailerNumber);
+                   // trailerNumber = findViewById(R.id.trailerNumber);
                     trailerName = findViewById(R.id.trailerName);
                     trailerQuality = findViewById(R.id.trailerQuality);
                     trailerName.setText(null);
                     trailerQuality.setText(null);
 
+                    spinnerCurrentPressedPosition = pos + 1;
+                    tvTrailer.setText(getResources().getString(R.string.trailer) + spinnerCurrentPressedPosition);
+
                     PopularMovies popularMovies = movieTrailers.get(pos);
 
                     shareTrailerLink = popularMovies.getTrailerKey();
                     shareTrailerTitle = popularMovies.getTrailerName();
-                  //  trailerName.setText(popularMovies.getTrailerName());
-                    Integer currentPosition = pos + 1;
-                    trailerNumber.setText(String.valueOf(currentPosition));
+                    //  trailerName.setText(popularMovies.getTrailerName());
+
+                  //  trailerNumber.setText(String.valueOf(currentPosition));
                     if (popularMovies.getTrailerQuality() != null) {
                         String qualityString = popularMovies.getTrailerQuality();
                         Log.i(MainActivity.TAG, "onItemSelected: qualityString : " + qualityString);
@@ -292,7 +352,6 @@ public class MovieDetailActivity extends AppCompatActivity {
                     trailerName = findViewById(R.id.trailerName);
                     trailerQuality = findViewById(R.id.trailerQuality);
                     trailerName.setText(null);
-                    trailerNumber.setText(null);
                     trailerQuality.setText(null);
                     tvTrailer.setText(getResources().getString(R.string.pick_trailer));
 
@@ -307,9 +366,6 @@ public class MovieDetailActivity extends AppCompatActivity {
     }
 
     public void noTrailersSpinnerOnClick() {
-
-        trailerNumber.setText(null);
-        binding.sMovieTrailers.setEnabled(false);
         binding.sMovieTrailers.setClickable(false);
         tvTrailer.setText(getResources().getString(R.string.no_trailers));
 
@@ -326,8 +382,8 @@ public class MovieDetailActivity extends AppCompatActivity {
     public void playTrailer(View view) {
 
         if (movieTrailers.size() != 1) {
-            Integer position = Integer.parseInt(trailerNumber.getText().toString()) - 1;
-            PopularMovies popularMovies = movieTrailers.get(position);
+           // Integer position = Integer.parseInt(trailerNumber.getText().toString()) - 1;
+            PopularMovies popularMovies = movieTrailers.get(spinnerCurrentPressedPosition - 1);
             Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + popularMovies.getTrailerKey()));
             Intent webIntent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse("http://www.youtube.com/watch?v=" + popularMovies.getTrailerKey()));
@@ -345,55 +401,6 @@ public class MovieDetailActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "No trailers to play", Toast.LENGTH_SHORT).show();
         }
 
-    }
-
-    private static List<PopularMovies> parseJSONMovieReviews(String responseJSON) {
-
-        try {
-            JSONObject jsonObject = new JSONObject(responseJSON);
-            JSONArray resultsJsonArray = jsonObject.getJSONArray("results");
-            movieReviews = new ArrayList<>();
-            if (resultsJsonArray.length() != 0) {
-                for (int i = 0; i < resultsJsonArray.length(); i++) {
-                    JSONObject movieReviewObject = resultsJsonArray.getJSONObject(i);
-                    String reviewAuthor = movieReviewObject.optString("author");
-                    String reviewContent = movieReviewObject.optString("content");
-
-                    PopularMovies popularMovies = new PopularMovies();
-                    popularMovies.setReviewAuthor(reviewAuthor);
-                    popularMovies.setReviewContent(reviewContent);
-                    movieReviews.add(popularMovies);
-                }
-
-            } else {
-                Log.i(MainActivity.TAG, "No reviews");
-                PopularMovies popularMovies = new PopularMovies();
-                popularMovies.setReviewAuthor("No reviews yet");
-                movieReviews.add(popularMovies);
-
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return movieReviews;
-
-    }
-
-    private static boolean isFavorite(Integer detailMovieID) {
-        Log.i(MainActivity.TAG, "IN isFavorite");
-        String checkQuery = "SELECT * FROM " + DBContract.DBEntry.TABLE_NAME + " WHERE " +
-                DBContract.DBEntry.COLUMN_MOVIE_ID + " = " + detailMovieID;
-        Log.i(MainActivity.TAG, "checkQuery: " + checkQuery);
-
-        Cursor cursor = sqLiteDatabase.rawQuery(checkQuery, null);
-        Log.i(MainActivity.TAG, "cursor.getCount()" + cursor.getCount());
-        if (cursor.getCount() <= 0) {
-            cursor.close();
-            return false;
-        }
-        cursor.close();
-        //  sqLiteDatabase.close();
-        return true;
     }
 
     public void onFavoritesClick(View view) {

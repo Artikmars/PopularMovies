@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog>
+    <release version="1.23" versioncode="7" >
+        <change>Improved rating and release date sections</change>
+        <change>Other improvements in the interface</change>
+    </release>
     <release version="1.22" versioncode="6" >
     <change>Russian Language Support</change>
     </release>

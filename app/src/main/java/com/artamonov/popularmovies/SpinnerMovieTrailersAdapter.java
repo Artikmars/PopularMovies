@@ -47,15 +47,18 @@ public class SpinnerMovieTrailersAdapter extends ArrayAdapter<String> {
     private View createItemView(int position, View convertView, ViewGroup parent) {
         final View view = layoutInflater.inflate(resource, parent, false);
         TextView trailerName = view.findViewById(R.id.trailerName);
-        TextView trailerNumber = view.findViewById(R.id.trailerNumber);
+        //TextView trailerNumber = view.findViewById(R.id.trailerNumber);
         TextView trailerQuality = view.findViewById(R.id.trailerQuality);
+        TextView trailerLabel = view.findViewById(R.id.tvTrailer);
+        Integer currentPosition = position + 1;
+        trailerLabel.setText(context.getResources().getString(R.string.trailer) + currentPosition);
         if (movieTrailersList.size() != 1 || (!movieTrailersList.get(position).getTrailerName().equals("No trailers")) &&
                 movieTrailersList.size() == 1) {
 
             PopularMovies popularMovies = movieTrailersList.get(position);
             trailerName.setText(popularMovies.getTrailerName());
-            Integer currentPosition = position + 1;
-            trailerNumber.setText(String.valueOf(currentPosition));
+
+           // trailerNumber.setText(String.valueOf(currentPosition));
 
             String qualityString = popularMovies.getTrailerQuality();
             trailerQuality.setText(qualityString);
