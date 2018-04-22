@@ -19,15 +19,17 @@ public class SpinnerMovieTrailersAdapter extends ArrayAdapter<String> {
     private final Context context;
     private final List<PopularMovies> movieTrailersList;
     private final int resource;
+    private final Spinner spinner;
 
     public SpinnerMovieTrailersAdapter(@NonNull Context context, @LayoutRes int resource,
-                                       @NonNull List objects) {
+                                       Spinner spinner, @NonNull List objects) {
         super(context, resource, objects);
 
         this.context = context;
         this.layoutInflater = LayoutInflater.from(context);
         this.resource = resource;
         movieTrailersList = objects;
+        this.spinner = spinner;
     }
 
     @Override
@@ -47,7 +49,8 @@ public class SpinnerMovieTrailersAdapter extends ArrayAdapter<String> {
         TextView trailerName = view.findViewById(R.id.trailerName);
         TextView trailerNumber = view.findViewById(R.id.trailerNumber);
         TextView trailerQuality = view.findViewById(R.id.trailerQuality);
-        if (movieTrailersList.size() != 1) {
+        if (movieTrailersList.size() != 1 || (!movieTrailersList.get(position).getTrailerName().equals("No trailers")) &&
+                movieTrailersList.size() == 1) {
 
             PopularMovies popularMovies = movieTrailersList.get(position);
             trailerName.setText(popularMovies.getTrailerName());
@@ -63,12 +66,8 @@ public class SpinnerMovieTrailersAdapter extends ArrayAdapter<String> {
             else
                 trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.red));
         } else {
-            TextView trailerLabel = view.findViewById(R.id.tvTrailer);
-            Spinner spinner = view.findViewById(R.id.sMovieTrailers);
-            trailerLabel.setText(context.getResources().getString(R.string.no_trailers));
-            trailerNumber.setText(null);
-            spinner.setEnabled(false);
-            spinner.setClickable(false);
+            MovieDetailActivity movieDetailActivity = new MovieDetailActivity();
+            movieDetailActivity.noTrailersSpinnerOnClick();
         }
         return view;
     }

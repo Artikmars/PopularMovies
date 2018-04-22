@@ -24,8 +24,8 @@ public class PopularMoviesParsing {
             if (resultsJsonArray.length() != 0) {
                 for (int i = 0; i < resultsJsonArray.length(); i++) {
                     JSONObject jsonMovieObject = resultsJsonArray.getJSONObject(i);
-                    String posterPath = jsonMovieObject.optString("poster_path");
-                    String baseURL = "http://image.tmdb.org/t/p/w185/" + posterPath;
+                    String baseURL = jsonMovieObject.optString("poster_path");
+                    String posterPath = "http://image.tmdb.org/t/p/w185/" + baseURL;
 
                     String title = jsonMovieObject.optString("title");
                     String voteAverage = jsonMovieObject.optString("vote_average");
@@ -34,7 +34,7 @@ public class PopularMoviesParsing {
                     Integer id = jsonMovieObject.optInt("id");
 
                     PopularMovies popularMovies = new PopularMovies();
-                    popularMovies.setBaseUrl(baseURL);
+                    popularMovies.setPosterPath(posterPath);
                     popularMovies.setId(id);
                     popularMovies.setTitle(title);
                     popularMovies.setReleaseDate(release_date);

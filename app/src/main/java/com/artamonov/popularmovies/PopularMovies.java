@@ -16,9 +16,18 @@ public class PopularMovies {
 
     private String reviewContent;
     private String reviewAuthor;
+    private byte[] poster;
 
     public PopularMovies() {
 
+    }
+
+    public byte[] getPoster() {
+        return poster;
+    }
+
+    public void setPoster(byte[] poster) {
+        this.poster = poster;
     }
 
     public String getReviewAuthor() {
@@ -70,9 +79,6 @@ public class PopularMovies {
         this.id = id;
     }
 
-    public void setBaseUrl(String baseUrl) {
-        this.posterPath = baseUrl;
-    }
 
     public String getTitle() {
         return title;
@@ -109,5 +115,8 @@ public class PopularMovies {
     public String getPosterPath() {
 
         return posterPath;
+    }
+    public void setPosterPath(String posterPath) {
+        this.posterPath = posterPath;
     }
 }

@@ -7,7 +7,12 @@
         android:id="@+id/sort"
         android:orderInCategory="100"
         android:title="@string/sort"
-        app:showAsAction="ifRoom"
-        android:tooltipText=""/>
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/cleanDB"
+        android:orderInCategory="100"
+        android:title="@string/clean_db"
+        app:showAsAction="ifRoom"/>
 
 </menu>

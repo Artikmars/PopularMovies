@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Popular Movies</string>
-    <string name="action_settings">Settings</string>
     <string name="sort">Sort</string>
     <string name="overview">Overview</string>
     <string name="title">Title</string>
@@ -17,5 +16,11 @@
     <string name="reviews"> Reviews </string>
     <string name="no_reviews"> No reviews yet</string>
     <string name="no_trailers"> No trailers</string>
+    <string name="add_favorites"> Add to favorites</string>
+    <string name="favorites"> Favorites</string>
+    <string name="clean_db"> Clean Favorites</string>
+    <string name="play_button">Play Button</string>
+    <string name="poster">Movie Poster</string>
+
 
 </resources>

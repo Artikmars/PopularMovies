@@ -1,6 +1,8 @@
 package com.artamonov.popularmovies;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -15,10 +17,11 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import static com.artamonov.popularmovies.MainActivity.TAG;
+import static com.artamonov.popularmovies.MainActivity.isChoseFavorites;
 
 public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecyclerViewAdapter.ViewHolder> {
     private static ItemClickListener listener;
-    private List<PopularMovies> popularMoviesList;
+    private final List<PopularMovies> popularMoviesList;
     private Context mContext;
 
     public MovieRecyclerViewAdapter(Context context, List<PopularMovies> popularMoviesList, ItemClickListener itemClickListener) {
@@ -40,16 +43,30 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int position) {
         Log.i(TAG, " onBindViewHolder " + position);
         PopularMovies popularMovies = popularMoviesList.get(position);
-
-        if (!TextUtils.isEmpty(popularMovies.getPosterPath())) {
-
-            Picasso.with(mContext)
-                    .load(popularMovies.getPosterPath())
-                    .placeholder(R.drawable.placeholder)
-                    .error(R.drawable.placeholder_error)
-                    .into(viewHolder.ivPoster);
+        Log.i(MainActivity.TAG, "popularMovies: " + popularMovies.getTitle() + ", " + popularMovies.getId() +
+                ", " + popularMovies.getPosterPath());
+        Log.i(TAG, " onBindViewHolder: get(position).getTitle() " + popularMoviesList.get(position).getTitle());
+        if (!isChoseFavorites()) {
+            Log.i(TAG, " onBindViewHolder: IS NOT Favorites: getPosterPath()) " + popularMovies.getPosterPath());
+            if (!TextUtils.isEmpty(popularMovies.getPosterPath())) {
+                Picasso.with(mContext)
+                        .load(popularMovies.getPosterPath())
+                        .placeholder(R.drawable.placeholder)
+                        .error(R.drawable.placeholder_error)
+                        .into(viewHolder.ivPoster);
+            } else {
+                Log.i(TAG, " onBindViewHolder: popularMovies.getPoster() is Empty) " + popularMovies.getPosterPath());
+            }
         } else {
-            Log.i(TAG, "popularMovies.getPosterPath() is Empty");
+            Log.i(TAG, " onBindViewHolder: IS Favorites");
+            if (popularMovies.getPoster() != null) {
+                byte[] poster = popularMovies.getPoster();
+                Bitmap bMap = BitmapFactory.decodeByteArray(poster, 0, poster.length);
+                viewHolder.ivPoster.setImageBitmap(bMap);
+            } else {
+                viewHolder.ivPoster.setImageResource(R.drawable.placeholder);
+                Log.i(TAG, " onBindViewHolder: popularMovies.getPoster() is Empty");
+            }
         }
     }
 
@@ -64,7 +81,7 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private ImageView ivPoster;
+        private final ImageView ivPoster;
 
         ViewHolder(View itemView) {
             super(itemView);
