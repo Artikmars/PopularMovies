@@ -5,7 +5,7 @@
     <string name="title">Title</string>
     <string name="release_date">23.06.2018</string>
     <string name="vote_average">10</string>
-    <string name="trailer">Trailer # </string>
+    <string name="trailer">Trailer # %1$d</string>
     <string name="trailers">Trailers</string>
     <string name="trailer_number">1</string>
     <string name="trailer_name"> The Shawshank Redemption - Trailer</string>
@@ -16,7 +16,8 @@
     <string name="reviews"> Reviews </string>
     <string name="no_reviews"> No reviews yet</string>
     <string name="no_trailers"> No trailers</string>
-    <string name="add_favorites"> Add to favorites</string>
+    <string name="add_favorites"> Add</string>
+    <string name="remove_favorites">Remove</string>
     <string name="favorites"> Favorites</string>
     <string name="clean_db"> Clean Favorites</string>
     <string name="play_button">Play Button</string>

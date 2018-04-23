@@ -100,6 +100,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                 DBContract.DBEntry.COLUMN_MOVIE_ID + " = " + detailMovieID;
         Log.i(MainActivity.TAG, "checkQuery: " + checkQuery);
 
+        sqLiteDatabase = dbHelper.getWritableDatabase();
         Cursor cursor = sqLiteDatabase.rawQuery(checkQuery, null);
         Log.i(MainActivity.TAG, "cursor.getCount()" + cursor.getCount());
         if (cursor.getCount() <= 0) {
@@ -152,6 +153,12 @@ public class MovieDetailActivity extends AppCompatActivity {
         detailMovieID = intent.getIntExtra("id", 1);
         Log.i(MainActivity.TAG, "movieID" + detailMovieID);
         Log.i(MainActivity.TAG, "id " + detailMovieID);
+
+
+        if (isFavorite(detailMovieID))  {
+            binding.ivFavorites.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black_24dp));
+            binding.tvFavorites.setText(R.string.remove_favorites);
+        }
 
         detailMoviePosterImage = intent.getParcelableExtra("posterImage");
         if (!isChoseFavorites()) {
@@ -315,14 +322,14 @@ public class MovieDetailActivity extends AppCompatActivity {
 
                     ConstraintLayout constraintLayout = view.findViewById(R.id.movieTrailersLayout);
                     tvTrailer = findViewById(R.id.tvTrailer);
-                   // trailerNumber = findViewById(R.id.trailerNumber);
+                    // trailerNumber = findViewById(R.id.trailerNumber);
                     trailerName = findViewById(R.id.trailerName);
                     trailerQuality = findViewById(R.id.trailerQuality);
                     trailerName.setText(null);
                     trailerQuality.setText(null);
 
                     spinnerCurrentPressedPosition = pos + 1;
-                    tvTrailer.setText(getResources().getString(R.string.trailer) + spinnerCurrentPressedPosition);
+                    tvTrailer.setText(getResources().getString(R.string.trailer, spinnerCurrentPressedPosition));
 
                     PopularMovies popularMovies = movieTrailers.get(pos);
 
@@ -330,7 +337,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                     shareTrailerTitle = popularMovies.getTrailerName();
                     //  trailerName.setText(popularMovies.getTrailerName());
 
-                  //  trailerNumber.setText(String.valueOf(currentPosition));
+                    //  trailerNumber.setText(String.valueOf(currentPosition));
                     if (popularMovies.getTrailerQuality() != null) {
                         String qualityString = popularMovies.getTrailerQuality();
                         Log.i(MainActivity.TAG, "onItemSelected: qualityString : " + qualityString);
@@ -382,7 +389,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     public void playTrailer(View view) {
 
         if (movieTrailers.size() != 1) {
-           // Integer position = Integer.parseInt(trailerNumber.getText().toString()) - 1;
+            // Integer position = Integer.parseInt(trailerNumber.getText().toString()) - 1;
             PopularMovies popularMovies = movieTrailers.get(spinnerCurrentPressedPosition - 1);
             Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + popularMovies.getTrailerKey()));
             Intent webIntent = new Intent(Intent.ACTION_VIEW,
@@ -410,10 +417,12 @@ public class MovieDetailActivity extends AppCompatActivity {
             Log.i(MainActivity.TAG, "isFavorite - true");
             onFavoritesDelete(view);
             binding.ivFavorites.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_border_black_24dp));
+            binding.tvFavorites.setText(R.string.add_favorites);
             Toast.makeText(getApplicationContext(), "Deleted from Favorites", Toast.LENGTH_SHORT).show();
         } else {
             Log.i(MainActivity.TAG, "isFavorite - false");
             onFavoritesAdd(view);
+            binding.tvFavorites.setText(R.string.remove_favorites);
             binding.ivFavorites.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black_24dp));
             Toast.makeText(getApplicationContext(), "Added to Favorites", Toast.LENGTH_SHORT).show();
         }

@@ -51,7 +51,7 @@ public class SpinnerMovieTrailersAdapter extends ArrayAdapter<String> {
         TextView trailerQuality = view.findViewById(R.id.trailerQuality);
         TextView trailerLabel = view.findViewById(R.id.tvTrailer);
         Integer currentPosition = position + 1;
-        trailerLabel.setText(context.getResources().getString(R.string.trailer) + currentPosition);
+        trailerLabel.setText(context.getResources().getString(R.string.trailer, currentPosition));
         if (movieTrailersList.size() != 1 || (!movieTrailersList.get(position).getTrailerName().equals("No trailers")) &&
                 movieTrailersList.size() == 1) {
 

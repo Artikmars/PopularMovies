@@ -70,10 +70,10 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ChangeLog cl = new ChangeLog(this);
+       /* ChangeLog cl = new ChangeLog(this);
         if (cl.isFirstRun()) {
             cl.getLogDialog().show();
-        }
+        }*/
         ButterKnife.bind(this);
         dbHelper = new DBHelper(this);
         Log.i(TAG, "dbVersion: " + DBHelper.DB_VERSION);
@@ -175,6 +175,11 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
             sqLiteDatabase.delete(TABLE_NAME, null, null);
             Log.i(MainActivity.TAG, "in cleanDb");
             Toast.makeText(getApplicationContext(), "Favorites are removed", Toast.LENGTH_SHORT).show();
+            popularMoviesList = new ArrayList<>();
+            movieRecyclerViewAdapter =
+                    new MovieRecyclerViewAdapter(MainActivity.this, popularMoviesList, this);
+            rvMovies.setAdapter(movieRecyclerViewAdapter);
+           // movieRecyclerViewAdapter.notifyDataSetChanged();
         }
     }
 

@@ -4,12 +4,13 @@
     <string name="sort">Сортировать</string>
     <string name="overview">Описание</string>
     <string name="title">Заголовок</string>
-    <string name="trailer">Трейлер #</string>
+    <string name="trailer">Трейлер # %1$d</string>
     <string name="pick_trailer">Выберите трейлер</string>
     <string name="reviews">Рецензии</string>
     <string name="no_reviews">Рецензий пока нет</string>
     <string name="no_trailers">Нет трейлеров</string>
-    <string name="add_favorites">В избранное</string>
+    <string name="add_favorites"> Добавить</string>
+    <string name="remove_favorites">Удалить</string>
     <string name="favorites">Избранное</string>
     <string name="clean_db">Очистить избранное</string>
     <string name="trailers">Трейлеры</string>

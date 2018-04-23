@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog>
+    <release version="1.24" versioncode="8" >
+        <change>Favorite icon remembers user's choice</change>
+        <change>Favorites are not displayed immediately after removing</change>
+        <change>Share button is updated</change>
+        <change>Favorites Add/Remove Description is added</change>
+    </release>
     <release version="1.23" versioncode="7" >
         <change>Improved rating and release date sections</change>
         <change>Other improvements in the interface</change>
