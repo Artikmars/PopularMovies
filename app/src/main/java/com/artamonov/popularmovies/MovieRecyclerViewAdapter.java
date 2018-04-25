@@ -59,13 +59,13 @@ public class MovieRecyclerViewAdapter extends RecyclerView.Adapter<MovieRecycler
             }
         } else {
             Log.i(TAG, " onBindViewHolder: IS Favorites");
-            if (popularMovies.getPoster() != null) {
-                byte[] poster = popularMovies.getPoster();
+            if (popularMovies.getPosterByte() != null) {
+                byte[] poster = popularMovies.getPosterByte();
                 Bitmap bMap = BitmapFactory.decodeByteArray(poster, 0, poster.length);
                 viewHolder.ivPoster.setImageBitmap(bMap);
             } else {
                 viewHolder.ivPoster.setImageResource(R.drawable.placeholder);
-                Log.i(TAG, " onBindViewHolder: popularMovies.getPoster() is Empty");
+                Log.i(TAG, " onBindViewHolder: popularMovies.getPosterByte() is Empty");
             }
         }
     }

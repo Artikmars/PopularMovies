@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -45,6 +46,8 @@ import okhttp3.Response;
 import static com.artamonov.popularmovies.MainActivity.API_KEY;
 import static com.artamonov.popularmovies.MainActivity.dbHelper;
 import static com.artamonov.popularmovies.MainActivity.isChoseFavorites;
+import static com.artamonov.popularmovies.MainActivity.popularMoviesList;
+import static com.artamonov.popularmovies.MainActivity.positionItemClick;
 import static com.artamonov.popularmovies.MainActivity.responseJSON;
 import static com.artamonov.popularmovies.MainActivity.sqLiteDatabase;
 
@@ -55,7 +58,8 @@ public class MovieDetailActivity extends AppCompatActivity {
     Context context;
     private MovieDetailActivityBinding binding;
     private int detailMovieID;
-    private Bitmap detailMoviePosterImage;
+    public static Bitmap detailMoviePosterImage;
+    private byte[] detailMoviePosterImageByte;
     private TextView trailerName, trailerQuality, tvTrailer;
     private String detailMovieTitle, detailMovieVoteAverage, detailMovieReleaseDate, detailMovieOverview;
     private String shareTrailerLink;
@@ -102,8 +106,9 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         sqLiteDatabase = dbHelper.getWritableDatabase();
         Cursor cursor = sqLiteDatabase.rawQuery(checkQuery, null);
-        Log.i(MainActivity.TAG, "cursor.getCount()" + cursor.getCount());
+
         if (cursor.getCount() <= 0) {
+            Log.i(MainActivity.TAG, "NOT favorite " + cursor.getCount());
             cursor.close();
             return false;
         }
@@ -130,11 +135,11 @@ public class MovieDetailActivity extends AppCompatActivity {
         if (releaseDateArray.length > 1) {
             detailMovieReleaseDate = releaseDateArray[2] + "." + releaseDateArray[1] + "." +
                     releaseDateArray[0];
-            binding.tvReleaseDate.setText(detailMovieReleaseDate);
         } else {
             detailMovieReleaseDate = releaseDateFromIntent;
-        }
 
+        }
+        binding.tvReleaseDate.setText(detailMovieReleaseDate);
        /* for (int i = 0; i < releaseDateArray.length; i++) {
             Log.i(MainActivity.TAG, "releaseDateArray [" + i + "]: " + releaseDateArray[i]);
             detailMovieReleaseDate = releaseDateArray[i] + ".";
@@ -155,13 +160,15 @@ public class MovieDetailActivity extends AppCompatActivity {
         Log.i(MainActivity.TAG, "id " + detailMovieID);
 
 
-        if (isFavorite(detailMovieID))  {
+        if (isFavorite(detailMovieID)) {
             binding.ivFavorites.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black_24dp));
             binding.tvFavorites.setText(R.string.remove_favorites);
         }
 
-        detailMoviePosterImage = intent.getParcelableExtra("posterImage");
+        detailMoviePosterImageByte = intent.getByteArrayExtra("posterImage");
+
         if (!isChoseFavorites()) {
+
             String detailMoviePosterPath = intent.getStringExtra("posterPath");
             Picasso.with(context)
                     .load(detailMoviePosterPath)
@@ -178,8 +185,15 @@ public class MovieDetailActivity extends AppCompatActivity {
             String movieReviewsURL = "https://api.themoviedb.org/3/movie/" + detailMovieID + "/reviews?api_key=" + API_KEY + "&language=en-US";
             getJSONMovieReviews(movieReviewsURL);
         } else {
-            binding.ivDetailPoster.setImageBitmap(detailMoviePosterImage);
 
+           // binding.ivDetailPoster.setImageBitmap(detailMoviePosterImage);
+            detailMoviePosterImage = BitmapFactory.decodeByteArray(detailMoviePosterImageByte, 0,
+                 detailMoviePosterImageByte.length);
+            Log.i(MainActivity.TAG2, "MovieDetailActivity: onCreate() ;  detailMoviePosterImage - " +  detailMoviePosterImage
+            + "detailMoviePosterImageByte - " + detailMoviePosterImageByte);
+            binding.ivDetailPoster.setImageBitmap(Bitmap.createScaledBitmap(detailMoviePosterImage,
+                   200,
+                   285, false));
         }
     }
 
@@ -386,10 +400,14 @@ public class MovieDetailActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * https://stackoverflow.com/questions/574195/android-youtube-app-play-video-intent/599119#599119
+     *
+     * @param view
+     */
     public void playTrailer(View view) {
 
         if (movieTrailers.size() != 1) {
-            // Integer position = Integer.parseInt(trailerNumber.getText().toString()) - 1;
             PopularMovies popularMovies = movieTrailers.get(spinnerCurrentPressedPosition - 1);
             Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + popularMovies.getTrailerKey()));
             Intent webIntent = new Intent(Intent.ACTION_VIEW,
@@ -441,16 +459,16 @@ public class MovieDetailActivity extends AppCompatActivity {
                 detailMovieVoteAverage);
         values.put(DBContract.DBEntry.COLUMN_OVERVIEW,
                 detailMovieOverview);
-
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        if (detailMoviePosterImage != null) {
-            detailMoviePosterImage.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-            byte[] poster = byteArrayOutputStream.toByteArray();
+       /* if (detailMoviePosterImage != null)
+           detailMoviePosterImage.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+            byte[] poster = byteArrayOutputStream.toByteArray();*/
             values.put(DBContract.DBEntry.COLUMN_POSTER,
-                    poster);
-        } else {
-            Log.i(MainActivity.TAG, "detailMoviePosterImage is null: ");
-        }
+                  popularMoviesList.get(positionItemClick).getPosterByte());
+            Log.i(MainActivity.TAG, "in OnFavoritesAdd - poster: " +  popularMoviesList.get(positionItemClick).getPosterByte());
+
+           // Log.i(MainActivity.TAG, "detailMoviePosterImage is null: ");
+
 
         Uri uri = getContentResolver().insert(
                 FavoritesProvider.CONTENT_URI, values);

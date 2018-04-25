@@ -4,8 +4,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,16 +18,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import de.cketti.library.changelog.ChangeLog;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -41,46 +35,72 @@ import static com.artamonov.popularmovies.DBContract.DBEntry.TABLE_NAME;
 
 public class MainActivity extends AppCompatActivity implements MovieRecyclerViewAdapter.ItemClickListener {
     public static final String TAG = "myLogs";
+    public static final String TAG2 = "myLogs2";
     //Enter your API key here only once
     public static final String API_KEY = "";
+    private final static String mostPopularUrl = "http://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY + "&language=en-US";
+    private final static String topRatedURL = "https://api.themoviedb.org/3/movie/top_rated?api_key=" + API_KEY + "&language=en-US";
     public static Request request;
     public static String responseJSON;
     public static DBHelper dbHelper;
     public static SQLiteDatabase sqLiteDatabase;
-    private final static String mostPopularUrl = "http://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY + "&language=en-US";
-    private final static String topRatedURL = "https://api.themoviedb.org/3/movie/top_rated?api_key=" + API_KEY + "&language=en-US";
     private static boolean isChoseFavorites = false;
+    private static boolean isMostPopular = true;
+    private static boolean isTopRated = false;
+
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.rvMovies)
     RecyclerView rvMovies;
-    private CharSequence[] values;
-    //  ArrayList<PopularMovies> dbPopularMoviesList = new ArrayList<>();
-    private Bitmap posterImage;
-    private List<PopularMovies> popularMoviesList;
+
+
+    public static List<PopularMovies> popularMoviesList;
     private AlertDialog alertDialog;
     private MovieRecyclerViewAdapter movieRecyclerViewAdapter;
+    public static int positionItemClick;
+    //  ArrayList<PopularMovies> dbPopularMoviesList = new ArrayList<>();
 
     public static boolean isChoseFavorites() {
         return isChoseFavorites;
+    }
+
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("popular", isMostPopular);
+        outState.putBoolean("topRated", isTopRated);
+        outState.putBoolean("favorites", isChoseFavorites);
+        Log.d(TAG, "onSaveInstanceState");
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        isMostPopular = savedInstanceState.getBoolean("popular");
+        isTopRated = savedInstanceState.getBoolean("topRated");
+        isChoseFavorites = savedInstanceState.getBoolean("favorites");
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-       /* ChangeLog cl = new ChangeLog(this);
-        if (cl.isFirstRun()) {
-            cl.getLogDialog().show();
-        }*/
         ButterKnife.bind(this);
         dbHelper = new DBHelper(this);
         Log.i(TAG, "dbVersion: " + DBHelper.DB_VERSION);
         setSupportActionBar(toolbar);
         rvMovies.setLayoutManager(new GridLayoutManager(this, 2));
-        getJSONData(mostPopularUrl);
+        //  getJSONData(mostPopularUrl);
+        getData();
     }
+
+    private void getData() {
+        if (isMostPopular) {
+            getJSONData(mostPopularUrl);
+        } else if (isTopRated) {
+            getJSONData(topRatedURL);
+        } else getAllFavoritesFromSQL();
+    }
+
     private void getJSONData(String url) {
 
         if (NetworkUtils.isNetworkAvailable(getApplicationContext())) {
@@ -145,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     }
 
     private void parseJSONData(String responseJSON) {
-        popularMoviesList = PopularMoviesParsing.parseMoviesJSON(responseJSON);
+        popularMoviesList = PopularMoviesParsing.parseMoviesJSON(getApplicationContext(), responseJSON);
         movieRecyclerViewAdapter = new MovieRecyclerViewAdapter(MainActivity.this, popularMoviesList, this);
         rvMovies.setAdapter(movieRecyclerViewAdapter);
     }
@@ -179,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
             movieRecyclerViewAdapter =
                     new MovieRecyclerViewAdapter(MainActivity.this, popularMoviesList, this);
             rvMovies.setAdapter(movieRecyclerViewAdapter);
-           // movieRecyclerViewAdapter.notifyDataSetChanged();
+            // movieRecyclerViewAdapter.notifyDataSetChanged();
         }
     }
 
@@ -187,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle(R.string.sort_title);
-        values = getResources().getStringArray(R.array.sort_array);
+        CharSequence[] values = getResources().getStringArray(R.array.sort_array);
         builder.setSingleChoiceItems(values, -1, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int item) {
@@ -195,15 +215,21 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
                 switch (item) {
                     case 0:
                         isChoseFavorites = false;
+                        isMostPopular = true;
+                        isTopRated = false;
                         getJSONData(mostPopularUrl);
                         break;
                     case 1:
                         isChoseFavorites = false;
+                        isTopRated = true;
+                        isMostPopular = false;
                         getJSONData(topRatedURL);
                         break;
 
                     case 2:
                         isChoseFavorites = true;
+                        isMostPopular = false;
+                        isTopRated = false;
                         getAllFavoritesFromSQL();
 
                 }
@@ -235,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
             popularMovies.setVoteAverage(cursor.getString(cursor.getColumnIndex(DBContract.DBEntry.COLUMN_RATING)));
             popularMovies.setOverview(cursor.getString(cursor.getColumnIndex(DBContract.DBEntry.COLUMN_OVERVIEW)));
             // popularMovies.setPosterPath(cursor.getString(cursor.getColumnIndex(DBContract.DBEntry.COLUMN_POSTER_PATH)));
-            popularMovies.setPoster(cursor.getBlob(cursor.getColumnIndex(DBContract.DBEntry.COLUMN_POSTER)));
+            popularMovies.setPosterByte(cursor.getBlob(cursor.getColumnIndex(DBContract.DBEntry.COLUMN_POSTER)));
             popularMoviesList.add(popularMovies);
             Log.i(MainActivity.TAG, "popularMovies: " + popularMoviesList.get(cursor.getPosition()).getTitle() + ", "
                     + popularMoviesList.get(cursor.getPosition()).getId() +
@@ -262,6 +288,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
 
     @Override
     public void onItemClick(int position) {
+        positionItemClick = position;
         Integer id = popularMoviesList.get(position).getId();
         Log.i(TAG, "In MainActivity: id" + id);
         String title = popularMoviesList.get(position).getTitle();
@@ -270,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         Log.i(TAG, "In MainActivity: voteAverage " + voteAverage);
         String overview = popularMoviesList.get(position).getOverview();
         String posterPath = popularMoviesList.get(position).getPosterPath();
-        Log.i(TAG, "In MainActivity: posterPath " + posterPath);
+        Log.i(TAG2, "In MainActivity: posterPath " + posterPath);
 
         Intent intent = new Intent(this, MovieDetailActivity.class);
         intent.putExtra("id", id);
@@ -279,29 +306,11 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         intent.putExtra("overview", overview);
         intent.putExtra("posterPath", posterPath);
         intent.putExtra("title", title);
+        intent.putExtra("posterImage", popularMoviesList.get(position).getPosterByte());
+        Log.i(TAG2, "In onItemClick: posterImage - " + popularMoviesList.get(position).getPosterByte());
 
-        Picasso.with(getApplicationContext())
-                .load(posterPath)
-                .placeholder(R.drawable.placeholder)
-                .error(R.drawable.placeholder_error)
-                .into(new Target() {
-                    @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        posterImage = bitmap;
-                    }
 
-                    @Override
-                    public void onBitmapFailed(Drawable errorDrawable) {
 
-                    }
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                    }
-                });
-        Log.i(TAG, "In onItemClick: posterImage - " + posterImage.toString());
-        intent.putExtra("posterImage", posterImage);
         startActivity(intent);
     }
 }

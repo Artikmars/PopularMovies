@@ -12,7 +12,6 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
-import static android.net.wifi.WifiConfiguration.GroupCipher.strings;
 import static com.artamonov.popularmovies.DBContract.DBEntry.COLUMN_ID;
 import static com.artamonov.popularmovies.DBContract.DBEntry.COLUMN_MOVIE_ID;
 import static com.artamonov.popularmovies.DBContract.DBEntry.COLUMN_NAME;
@@ -101,6 +100,7 @@ public class FavoritesProvider extends ContentProvider {
             return resultUri;
         }
     }
+
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
 

@@ -1,6 +1,8 @@
 package com.artamonov.popularmovies;
 
 
+import android.graphics.Bitmap;
+
 public class PopularMovies {
 
     private Integer id;
@@ -16,17 +18,27 @@ public class PopularMovies {
 
     private String reviewContent;
     private String reviewAuthor;
-    private byte[] poster;
+    private Bitmap poster;
+
+    public byte[] getPosterByte() {
+        return posterByte;
+    }
+
+    public void setPosterByte(byte[] posterByte) {
+        this.posterByte = posterByte;
+    }
+
+    private byte[] posterByte;
 
     public PopularMovies() {
 
     }
 
-    public byte[] getPoster() {
+    public Bitmap getPoster() {
         return poster;
     }
 
-    public void setPoster(byte[] poster) {
+    public void setPoster(Bitmap poster) {
         this.poster = poster;
     }
 
