@@ -5,26 +5,19 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.artamonov.popularmovies.databinding.MovieDetailActivityBinding;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -36,7 +29,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.ButterKnife;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -56,10 +56,18 @@ public class MovieDetailActivity extends AppCompatActivity {
     private static List<PopularMovies> movieReviews = new ArrayList<>();
     private final List<PopularMovies> movieTrailers = new ArrayList<>();
     Context context;
-    private MovieDetailActivityBinding binding;
+    Toolbar toolbar;
+    TextView tvReleaseDate;
+    TextView tvTitle;
+    TextView tvOverview;
+    TextView tvVoteAverage;
+    ImageView ivFavorites;
+    TextView tvFavorites;
+    ImageView ivDetailPoster;
+    RecyclerView rvReviews;
+    Spinner sMovieTrailers;
+    ImageView ibPlay;
     private int detailMovieID;
-    public static Bitmap detailMoviePosterImage;
-    private byte[] detailMoviePosterImageByte;
     private TextView trailerName, trailerQuality, tvTrailer;
     private String detailMovieTitle, detailMovieVoteAverage, detailMovieReleaseDate, detailMovieOverview;
     private String shareTrailerLink;
@@ -120,15 +128,23 @@ public class MovieDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // setContentView(R.layout.movie_detail_activity);
-        binding = DataBindingUtil.setContentView(this, R.layout.movie_detail_activity);
-        ButterKnife.bind(MovieDetailActivity.this);
-        setSupportActionBar((Toolbar) binding.toolbar);
+        setContentView(R.layout.movie_detail_activity);
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         Intent intent = getIntent();
-
+        tvReleaseDate = findViewById(R.id.tvReleaseDate);
+        tvTitle = findViewById(R.id.tvTitle);
+        tvOverview = findViewById(R.id.tvOverview);
+        tvVoteAverage = findViewById(R.id.tvVoteAverage);
+        ivFavorites = findViewById(R.id.ivFavorites);
+        tvFavorites = findViewById(R.id.tvFavorites);
+        ivDetailPoster = findViewById(R.id.ivDetailPoster);
+        rvReviews = findViewById(R.id.rvReviews);
+        sMovieTrailers = findViewById(R.id.sMovieTrailers);
+        ibPlay = findViewById(R.id.ibPlay);
 
         String releaseDateFromIntent = intent.getStringExtra("releaseDate");
         String[] releaseDateArray = releaseDateFromIntent.split("-");
@@ -139,7 +155,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             detailMovieReleaseDate = releaseDateFromIntent;
 
         }
-        binding.tvReleaseDate.setText(detailMovieReleaseDate);
+        tvReleaseDate.setText(detailMovieReleaseDate);
        /* for (int i = 0; i < releaseDateArray.length; i++) {
             Log.i(MainActivity.TAG, "releaseDateArray [" + i + "]: " + releaseDateArray[i]);
             detailMovieReleaseDate = releaseDateArray[i] + ".";
@@ -150,34 +166,34 @@ public class MovieDetailActivity extends AppCompatActivity {
         detailMovieVoteAverage = intent.getStringExtra("voteAverage");
         detailMovieTitle = intent.getStringExtra("title");
         Log.i(MainActivity.TAG, "MovieDetail = onCreate - title: " + detailMovieTitle);
-        binding.tvTitle.setText(detailMovieTitle);
+        tvTitle.setText(detailMovieTitle);
 
-        binding.tvVoteAverage.setText(voteAverageOutOfTen);
+        tvVoteAverage.setText(voteAverageOutOfTen);
         detailMovieOverview = (intent.getStringExtra("overview"));
-        binding.tvOverview.setText(detailMovieOverview);
+        tvOverview.setText(detailMovieOverview);
         detailMovieID = intent.getIntExtra("id", 1);
         Log.i(MainActivity.TAG, "movieID" + detailMovieID);
         Log.i(MainActivity.TAG, "id " + detailMovieID);
 
 
         if (isFavorite(detailMovieID)) {
-            binding.ivFavorites.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black_24dp));
-            binding.tvFavorites.setText(R.string.remove_favorites);
+            ivFavorites.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black_24dp));
+            tvFavorites.setText(R.string.remove_favorites);
         }
 
-        detailMoviePosterImageByte = intent.getByteArrayExtra("posterImage");
+        byte[] detailMoviePosterImageByte = intent.getByteArrayExtra("posterImage");
 
         if (!isChoseFavorites()) {
 
             String detailMoviePosterPath = intent.getStringExtra("posterPath");
-            Picasso.with(context)
+            Picasso.get()
                     .load(detailMoviePosterPath)
                     .placeholder(R.drawable.placeholder)
                     .error(R.drawable.placeholder_error)
-                    .into(binding.ivDetailPoster);
+                    .into(ivDetailPoster);
 
             //spinner = findViewById(R.id.sMovieTrailers);
-            binding.rvReviews.setLayoutManager(new LinearLayoutManager(this));
+            rvReviews.setLayoutManager(new LinearLayoutManager(this));
             String movieTrailersURL = "https://api.themoviedb.org/3/movie/" + detailMovieID + "/videos?api_key=" + API_KEY + "&language=en-US";
             // Log.i(MainActivity.TAG, "movieTrailersURL" + movieTrailersURL);
             getJSONMovieTrailers(movieTrailersURL);
@@ -186,14 +202,14 @@ public class MovieDetailActivity extends AppCompatActivity {
             getJSONMovieReviews(movieReviewsURL);
         } else {
 
-           // binding.ivDetailPoster.setImageBitmap(detailMoviePosterImage);
-            detailMoviePosterImage = BitmapFactory.decodeByteArray(detailMoviePosterImageByte, 0,
-                 detailMoviePosterImageByte.length);
-            Log.i(MainActivity.TAG2, "MovieDetailActivity: onCreate() ;  detailMoviePosterImage - " +  detailMoviePosterImage
-            + "detailMoviePosterImageByte - " + detailMoviePosterImageByte);
-            binding.ivDetailPoster.setImageBitmap(Bitmap.createScaledBitmap(detailMoviePosterImage,
-                   200,
-                   285, false));
+            // binding.ivDetailPoster.setImageBitmap(detailMoviePosterImage);
+            Bitmap detailMoviePosterImage = BitmapFactory.decodeByteArray(detailMoviePosterImageByte, 0,
+                    detailMoviePosterImageByte.length);
+            Log.i(MainActivity.TAG2, "MovieDetailActivity: onCreate() ;  detailMoviePosterImage - " + detailMoviePosterImage
+                    + "detailMoviePosterImageByte - " + detailMoviePosterImageByte);
+            ivDetailPoster.setImageBitmap(Bitmap.createScaledBitmap(detailMoviePosterImage,
+                    200,
+                    285, false));
         }
     }
 
@@ -280,9 +296,9 @@ public class MovieDetailActivity extends AppCompatActivity {
                                           public void run() {
                                               movieReviews = parseJSONMovieReviews(responseJSON);
                                               MovieReviewsRecyclerViewAdapter movieReviewsRecyclerViewAdapter =
-                                                      new MovieReviewsRecyclerViewAdapter(MovieDetailActivity.this,
+                                                      new MovieReviewsRecyclerViewAdapter(
                                                               movieReviews);
-                                              binding.rvReviews.setAdapter(movieReviewsRecyclerViewAdapter);
+                                              rvReviews.setAdapter(movieReviewsRecyclerViewAdapter);
                                           }
                                       }
                         );
@@ -328,10 +344,10 @@ public class MovieDetailActivity extends AppCompatActivity {
             }
 
             SpinnerMovieTrailersAdapter adapter = new SpinnerMovieTrailersAdapter(this,
-                    R.layout.movie_trailers, binding.sMovieTrailers, movieTrailers);
+                    R.layout.movie_trailers, movieTrailers);
 
-            binding.sMovieTrailers.setAdapter(adapter);
-            binding.sMovieTrailers.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            sMovieTrailers.setAdapter(adapter);
+            sMovieTrailers.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 
                     ConstraintLayout constraintLayout = view.findViewById(R.id.movieTrailersLayout);
@@ -355,12 +371,16 @@ public class MovieDetailActivity extends AppCompatActivity {
                     if (popularMovies.getTrailerQuality() != null) {
                         String qualityString = popularMovies.getTrailerQuality();
                         Log.i(MainActivity.TAG, "onItemSelected: qualityString : " + qualityString);
-                        if (qualityString.equals("1080")) {
-                            constraintLayout.setBackgroundColor(getResources().getColor(R.color.green));
-                        } else if (qualityString.equals("720")) {
-                            constraintLayout.setBackgroundColor(getResources().getColor(R.color.yellow));
-                        } else {
-                            constraintLayout.setBackgroundColor(getResources().getColor(R.color.red));
+                        switch (qualityString) {
+                            case "1080":
+                                constraintLayout.setBackgroundColor(getResources().getColor(R.color.green));
+                                break;
+                            case "720":
+                                constraintLayout.setBackgroundColor(getResources().getColor(R.color.yellow));
+                                break;
+                            default:
+                                constraintLayout.setBackgroundColor(getResources().getColor(R.color.red));
+                                break;
                         }
                     } else {
                         noTrailersSpinnerOnClick();
@@ -387,7 +407,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     }
 
     public void noTrailersSpinnerOnClick() {
-        binding.sMovieTrailers.setClickable(false);
+        sMovieTrailers.setClickable(false);
         tvTrailer.setText(getResources().getString(R.string.no_trailers));
 
         // Spinner spinner = view.findViewById(R.id.sMovieTrailers);
@@ -422,7 +442,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             }
         } else {
             Log.i(MainActivity.TAG, "playTrailer - No trailers");
-            binding.ibPlay.setEnabled(false);
+            ibPlay.setEnabled(false);
             Toast.makeText(getApplicationContext(), "No trailers to play", Toast.LENGTH_SHORT).show();
         }
 
@@ -434,19 +454,19 @@ public class MovieDetailActivity extends AppCompatActivity {
         if (isFavorite(detailMovieID)) {
             Log.i(MainActivity.TAG, "isFavorite - true");
             onFavoritesDelete(view);
-            binding.ivFavorites.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_border_black_24dp));
-            binding.tvFavorites.setText(R.string.add_favorites);
+            ivFavorites.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_border_black_24dp));
+            tvFavorites.setText(R.string.add_favorites);
             Toast.makeText(getApplicationContext(), "Deleted from Favorites", Toast.LENGTH_SHORT).show();
         } else {
             Log.i(MainActivity.TAG, "isFavorite - false");
             onFavoritesAdd(view);
-            binding.tvFavorites.setText(R.string.remove_favorites);
-            binding.ivFavorites.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black_24dp));
+            tvFavorites.setText(R.string.remove_favorites);
+            ivFavorites.setImageDrawable(getResources().getDrawable(R.drawable.ic_favorite_black_24dp));
             Toast.makeText(getApplicationContext(), "Added to Favorites", Toast.LENGTH_SHORT).show();
         }
     }
 
-    public void onFavoritesAdd(View view) {
+    private void onFavoritesAdd(View view) {
 
         ContentValues values = new ContentValues();
         values.put(DBContract.DBEntry.COLUMN_MOVIE_ID,
@@ -463,11 +483,11 @@ public class MovieDetailActivity extends AppCompatActivity {
        /* if (detailMoviePosterImage != null)
            detailMoviePosterImage.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
             byte[] poster = byteArrayOutputStream.toByteArray();*/
-            values.put(DBContract.DBEntry.COLUMN_POSTER,
-                  popularMoviesList.get(positionItemClick).getPosterByte());
-            Log.i(MainActivity.TAG, "in OnFavoritesAdd - poster: " +  popularMoviesList.get(positionItemClick).getPosterByte());
+        values.put(DBContract.DBEntry.COLUMN_POSTER,
+                popularMoviesList.get(positionItemClick).getPosterByte());
+        Log.i(MainActivity.TAG, "in OnFavoritesAdd - poster: " + popularMoviesList.get(positionItemClick).getPosterByte());
 
-           // Log.i(MainActivity.TAG, "detailMoviePosterImage is null: ");
+        // Log.i(MainActivity.TAG, "detailMoviePosterImage is null: ");
 
 
         Uri uri = getContentResolver().insert(

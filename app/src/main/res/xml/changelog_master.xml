@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog>
+    <release
+        version="1.25.1"
+        versioncode="10">
+        <change>Migrate to AndroidX</change>
+    </release>
     <release version="1.25" versioncode="8" >
         <change>Preserving data after rotation</change>
     </release>

@@ -1,8 +1,5 @@
 package com.artamonov.popularmovies;
 
-import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,17 +8,14 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class MovieReviewsRecyclerViewAdapter extends RecyclerView.Adapter<MovieReviewsRecyclerViewAdapter.ViewHolder> {
 
     private final List<PopularMovies> movieReviewsList;
-    private final Context context;
 
-
-    public MovieReviewsRecyclerViewAdapter(Context context, List<PopularMovies> reviewsList) {
-        this.context = context;
+    public MovieReviewsRecyclerViewAdapter(List<PopularMovies> reviewsList) {
         this.movieReviewsList = reviewsList;
     }
 
@@ -52,15 +46,14 @@ public class MovieReviewsRecyclerViewAdapter extends RecyclerView.Adapter<MovieR
         return movieReviewsList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.reviewAuthor)
+    class ViewHolder extends RecyclerView.ViewHolder {
         TextView reviewAuthor;
-        @BindView(R.id.reviewContent)
         TextView reviewContent;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            reviewAuthor = itemView.findViewById(R.id.reviewAuthor);
+            reviewContent = itemView.findViewById(R.id.reviewContent);
 
         }
     }

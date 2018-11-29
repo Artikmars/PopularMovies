@@ -2,7 +2,7 @@ package com.artamonov.popularmovies;
 
 import android.provider.BaseColumns;
 
-public class DBContract {
+class DBContract {
 
     private DBContract() {
     }

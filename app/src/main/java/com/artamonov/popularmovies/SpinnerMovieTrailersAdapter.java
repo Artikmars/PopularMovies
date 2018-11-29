@@ -1,17 +1,17 @@
 package com.artamonov.popularmovies;
 
 import android.content.Context;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.List;
+
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class SpinnerMovieTrailersAdapter extends ArrayAdapter<String> {
 
@@ -19,17 +19,14 @@ public class SpinnerMovieTrailersAdapter extends ArrayAdapter<String> {
     private final Context context;
     private final List<PopularMovies> movieTrailersList;
     private final int resource;
-    private final Spinner spinner;
 
-    public SpinnerMovieTrailersAdapter(@NonNull Context context, @LayoutRes int resource,
-                                       Spinner spinner, @NonNull List objects) {
+    SpinnerMovieTrailersAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List objects) {
         super(context, resource, objects);
 
         this.context = context;
         this.layoutInflater = LayoutInflater.from(context);
         this.resource = resource;
         movieTrailersList = objects;
-        this.spinner = spinner;
     }
 
     @Override
@@ -58,16 +55,21 @@ public class SpinnerMovieTrailersAdapter extends ArrayAdapter<String> {
             PopularMovies popularMovies = movieTrailersList.get(position);
             trailerName.setText(popularMovies.getTrailerName());
 
-           // trailerNumber.setText(String.valueOf(currentPosition));
+            // trailerNumber.setText(String.valueOf(currentPosition));
 
             String qualityString = popularMovies.getTrailerQuality();
             trailerQuality.setText(qualityString);
-            if (qualityString.equals("1080"))
-                trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.green));
-            else if (qualityString.equals("720"))
-                trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.yellow));
-            else
-                trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.red));
+            switch (qualityString) {
+                case "1080":
+                    trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.green));
+                    break;
+                case "720":
+                    trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.yellow));
+                    break;
+                default:
+                    trailerQuality.setBackgroundColor(context.getResources().getColor(R.color.red));
+                    break;
+            }
         } else {
             MovieDetailActivity movieDetailActivity = new MovieDetailActivity();
             movieDetailActivity.noTrailersSpinnerOnClick();

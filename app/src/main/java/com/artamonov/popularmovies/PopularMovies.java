@@ -3,7 +3,7 @@ package com.artamonov.popularmovies;
 
 import android.graphics.Bitmap;
 
-public class PopularMovies {
+class PopularMovies {
 
     private Integer id;
     private String title;

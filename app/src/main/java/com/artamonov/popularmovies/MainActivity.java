@@ -6,13 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,8 +15,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -37,27 +35,21 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     public static final String TAG = "myLogs";
     public static final String TAG2 = "myLogs2";
     //Enter your API key here only once
-    public static final String API_KEY = "";
+    public static final String API_KEY = "e5cd8e06d813189c449e9194b4f48b67";
     private final static String mostPopularUrl = "http://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY + "&language=en-US";
     private final static String topRatedURL = "https://api.themoviedb.org/3/movie/top_rated?api_key=" + API_KEY + "&language=en-US";
     public static Request request;
     public static String responseJSON;
     public static DBHelper dbHelper;
     public static SQLiteDatabase sqLiteDatabase;
+    public static List<PopularMovies> popularMoviesList;
+    public static int positionItemClick;
     private static boolean isChoseFavorites = false;
     private static boolean isMostPopular = true;
     private static boolean isTopRated = false;
-
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-    @BindView(R.id.rvMovies)
     RecyclerView rvMovies;
-
-
-    public static List<PopularMovies> popularMoviesList;
     private AlertDialog alertDialog;
     private MovieRecyclerViewAdapter movieRecyclerViewAdapter;
-    public static int positionItemClick;
     //  ArrayList<PopularMovies> dbPopularMoviesList = new ArrayList<>();
 
     public static boolean isChoseFavorites() {
@@ -84,10 +76,11 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
         dbHelper = new DBHelper(this);
         Log.i(TAG, "dbVersion: " + DBHelper.DB_VERSION);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        rvMovies = findViewById(R.id.rvMovies);
         rvMovies.setLayoutManager(new GridLayoutManager(this, 2));
         //  getJSONData(mostPopularUrl);
         getData();
@@ -166,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
 
     private void parseJSONData(String responseJSON) {
         popularMoviesList = PopularMoviesParsing.parseMoviesJSON(getApplicationContext(), responseJSON);
-        movieRecyclerViewAdapter = new MovieRecyclerViewAdapter(MainActivity.this, popularMoviesList, this);
+        movieRecyclerViewAdapter = new MovieRecyclerViewAdapter(popularMoviesList, this);
         rvMovies.setAdapter(movieRecyclerViewAdapter);
     }
 
@@ -197,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
             Toast.makeText(getApplicationContext(), "Favorites are removed", Toast.LENGTH_SHORT).show();
             popularMoviesList = new ArrayList<>();
             movieRecyclerViewAdapter =
-                    new MovieRecyclerViewAdapter(MainActivity.this, popularMoviesList, this);
+                    new MovieRecyclerViewAdapter(popularMoviesList, this);
             rvMovies.setAdapter(movieRecyclerViewAdapter);
             // movieRecyclerViewAdapter.notifyDataSetChanged();
         }
@@ -278,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         }
 
         movieRecyclerViewAdapter =
-                new MovieRecyclerViewAdapter(MainActivity.this, popularMoviesList, this);
+                new MovieRecyclerViewAdapter(popularMoviesList, this);
         rvMovies.setAdapter(movieRecyclerViewAdapter);
         movieRecyclerViewAdapter.notifyDataSetChanged();
         cursor.close();
@@ -308,7 +301,6 @@ public class MainActivity extends AppCompatActivity implements MovieRecyclerView
         intent.putExtra("title", title);
         intent.putExtra("posterImage", popularMoviesList.get(position).getPosterByte());
         Log.i(TAG2, "In onItemClick: posterImage - " + popularMoviesList.get(position).getPosterByte());
-
 
 
         startActivity(intent);

@@ -18,7 +18,7 @@ import java.util.List;
 
 import static com.artamonov.popularmovies.MainActivity.TAG;
 
-public class PopularMoviesParsing {
+class PopularMoviesParsing {
     private static Bitmap posterImage = null;
     private static byte[] poster;
 
@@ -31,13 +31,17 @@ public class PopularMoviesParsing {
             if (bitmap != null) {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
                 poster = byteArrayOutputStream.toByteArray();
-            } else { Log.i(TAG, "In PARSING:  bitmap is NULL: " + bitmap);}
+            } else {
+                Log.i(TAG, "In PARSING:  bitmap is NULL: " + bitmap);
+            }
         }
 
         @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
+        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
             Log.i(TAG, "In onBitmapFailed");
         }
+
 
         @Override
         public void onPrepareLoad(Drawable placeHolderDrawable) {
@@ -67,7 +71,7 @@ public class PopularMoviesParsing {
                     String overview = jsonMovieObject.optString("overview");
                     Integer id = jsonMovieObject.optInt("id");
 
-                    Picasso.with(context)
+                    Picasso.get()
                             .load(posterPath)
                             .placeholder(R.drawable.placeholder)
                             .error(R.drawable.placeholder_error)
